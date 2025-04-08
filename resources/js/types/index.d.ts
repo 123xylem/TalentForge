@@ -31,9 +31,22 @@ export interface User {
     name: string;
     email: string;
     avatar?: string;
+    type?: string;
+    company?: string;
+    bio?: string;
+    website?: string;
+    profile_image?: string;
+    location?: string;
+    cv?: string;
+    phone?: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+}
+
+export interface Skill {
+    id: number;
+    name: string;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
