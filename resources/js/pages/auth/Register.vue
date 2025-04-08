@@ -9,7 +9,6 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
-const userType = ref('job_hunter');
 const showEmployerFields = ref(false);
 
 const form = useForm({

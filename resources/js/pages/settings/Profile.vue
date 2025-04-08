@@ -30,8 +30,6 @@ const {
     status,
 } = page.props;
 
-console.log(userSkills, 'userSkills', page.props);
-
 const form = useForm({
     name: user.name,
     email: user.email,
@@ -41,7 +39,7 @@ const form = useForm({
     website: user.website || '',
     location: user.location || '',
     phone: user.phone || '',
-    skills: userSkills.map((skill: Skill) => skill.id),
+    skills: (userSkills as Skill[]).map((skill: Skill) => skill.id),
 });
 
 const submit = () => {
