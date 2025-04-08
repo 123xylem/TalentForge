@@ -24,6 +24,15 @@ export interface SharedData extends PageProps {
     auth: Auth;
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
+    availableSkills?: Skill[];
+    availableCategories?: Category[];
+    userSkills?: Skill[];
+    userCategories?: Category[];
+    listings?: Listing[];
+    flash?: {
+        errors?: any;
+        success?: any;
+    };
 }
 
 export interface User {
@@ -44,7 +53,23 @@ export interface User {
     updated_at: string;
 }
 
+export interface Listing {
+    id: number;
+    title: string;
+    description: string;
+    salary: string;
+    location: string;
+    created_at: string;
+    updated_at: string;
+    skills: Skill[];
+    categories: Category[];
+}
 export interface Skill {
+    id: number;
+    name: string;
+}
+
+export interface Category {
     id: number;
     name: string;
 }
