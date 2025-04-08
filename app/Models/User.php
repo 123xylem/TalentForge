@@ -9,6 +9,19 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'type', // job_hunter or employer
+        'company',
+        'bio',
+        'website',
+        'profile_image',
+        'location',
+        'cv',
+        'phone',
+    ];
 
     // The type of user
     public function isEmployer()
@@ -37,28 +50,25 @@ class User extends Authenticatable
         return $this->hasMany(Application::class);
     }
 
+    public function alerts()
+    {
+        return $this->hasMany(Alert::class);
+    }
+
+    // Check if the user has completed their profile (for making applications)
+    public function hasCompletedProfile()
+    {
+        return $this->skills()->count() > 0 && $this->cv !== null;
+    }
+
+
+
 
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'type', // job_hunter or employer
-        'company',
-        'bio',
-        'website',
-        'profile_image',
-        'location',
-        'cv',
-        'phone',
-    ];
+
     /**
      * The attributes that should be hidden for serialization.
      *
