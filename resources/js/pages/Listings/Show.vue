@@ -2,7 +2,7 @@
 import { useTextFormatter } from '@/composables/useTextFormatter';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 
 const { truncate } = useTextFormatter();
 
@@ -19,7 +19,14 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: `/listings/${listing?.id}`,
     },
 ];
-console.log(page.props);
+
+const form = useForm({});
+
+const deleteListing = () => {
+    if (confirm('Are you sure you want to delete this listing?')) {
+        form.delete(route('listings.destroy', listing?.id));
+    }
+};
 </script>
 
 <template>
@@ -40,13 +47,13 @@ console.log(page.props);
                 <p class="text-sm text-neutral-500">{{ listing?.location }}</p>
             </div>
             <div class="flex flex-col gap-4">
-                <h2 class="text-lg font-semibold">Skills</h2>
+                <h2 class="text-lg font-semibold">Skills Required</h2>
                 <div class="flex flex-wrap gap-2">
                     <div v-for="skill in listing?.skills" :key="skill.id" class="rounded-full bg-gray-700 px-2 py-1 text-sm text-neutral-500">
                         {{ skill.name }}
                     </div>
                 </div>
-                <h2 class="text-lg font-semibold">Categories</h2>
+                <h2 class="text-lg font-semibold">Category</h2>
                 <div class="flex flex-wrap gap-2">
                     <div
                         v-for="category in listing?.categories"
@@ -62,11 +69,12 @@ console.log(page.props);
                             Edit
                         </button>
                     </Link>
-                    <Link :href="route('listings.destroy', listing?.id)">
-                        <button class="rounded-full bg-red-500 px-2 py-1 text-sm text-neutral-500 text-white hover:cursor-pointer hover:bg-red-600">
-                            Delete
-                        </button>
-                    </Link>
+                    <button
+                        @click="deleteListing"
+                        class="rounded-full bg-red-500 px-2 py-1 text-sm text-neutral-500 text-white hover:cursor-pointer hover:bg-red-600"
+                    >
+                        Delete
+                    </button>
                 </div>
             </div>
         </div>
