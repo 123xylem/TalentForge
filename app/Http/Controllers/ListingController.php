@@ -20,10 +20,6 @@ class ListingController extends Controller
     {
         return Inertia::render('Listings/Index', [
             'listings' => Listing::all(),
-            'flash' => [
-                'errors' => session('errors', new \Illuminate\Support\ViewErrorBag),
-                'success' => session('success', null),
-            ],
         ]);
     }
 
@@ -35,10 +31,6 @@ class ListingController extends Controller
         return Inertia::render('Listings/Create', [
             'availableSkills' => Skill::all(),
             'availableCategories' => Category::all(),
-            'flash' => [
-                'errors' => session('errors', new \Illuminate\Support\ViewErrorBag),
-                'success' => session('success', null),
-            ],
         ]);
     }
 
@@ -52,13 +44,10 @@ class ListingController extends Controller
         $listing->skills()->attach($request->skills);
         $listing->categories()->attach($request->categories);
         $listing->save();
-        return Inertia::render('Listings/Index', [
-            'listings' => Listing::all(),
-            'flash' => [
-                'errors' => session('errors', new \Illuminate\Support\ViewErrorBag),
-                'success' => session('success', null),
-            ],
-        ]);
+
+        return redirect()
+            ->route('listings.show', $listing->id)
+            ->with('success', 'Listing created successfully!');
     }
 
     /**
@@ -66,7 +55,12 @@ class ListingController extends Controller
      */
     public function show(Listing $listing)
     {
-        //
+        return Inertia::render('Listings/Show', [
+            'listing' => $listing,
+            'isOwner' => $listing->user_id === Auth::id(),
+            'skills' => $listing->skills,
+            'categories' => $listing->categories,
+        ]);
     }
 
     /**
@@ -74,15 +68,27 @@ class ListingController extends Controller
      */
     public function edit(Listing $listing)
     {
-        //
+        $listing->load(['skills', 'categories']);
+
+        return Inertia::render('Listings/Edit', [
+            'listing' => $listing,
+            'availableSkills' => Skill::all(),
+            'availableCategories' => Category::all(),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Listing $listing)
+    public function update(ListingRequest $request, Listing $listing)
     {
-        //
+        $listing->update($request->all());
+        $listing->skills()->sync($request->skills);
+        $listing->categories()->sync($request->categories);
+
+        return redirect()
+            ->route('listings.show', $listing->id)
+            ->with('success', 'Listing updated successfully!');
     }
 
     /**
@@ -90,6 +96,10 @@ class ListingController extends Controller
      */
     public function destroy(Listing $listing)
     {
-        //
+        $listing->delete();
+
+        return redirect()
+            ->route('listings.index')
+            ->with('success', 'Listing deleted successfully!');
     }
 }

@@ -9,7 +9,6 @@ import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import DeleteUser from '@/components/DeleteUser.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
-import StatusContainer from '@/components/StatusContainer.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 
@@ -52,7 +51,6 @@ const submit = () => {
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
         <Head title="Profile settings" />
-        <StatusContainer :errors="form.errors" :success="flash.success" />
         <SettingsLayout>
             <div class="flex flex-col space-y-6">
                 <HeadingSmall title="Profile information" description="Update your profile information" />
