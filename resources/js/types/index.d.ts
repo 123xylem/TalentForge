@@ -33,6 +33,7 @@ export interface SharedData extends PageProps {
         errors?: any;
         success?: any;
     };
+    listing?: Listing;
 }
 
 export interface User {
@@ -57,12 +58,15 @@ export interface Listing {
     id: number;
     title: string;
     description: string;
-    salary: string;
-    location: string;
-    created_at: string;
-    updated_at: string;
-    skills: Skill[];
-    categories: Category[];
+    salary?: string;
+    location?: string;
+    created_at?: string;
+    updated_at?: string;
+    skills?: Skill[];
+    categories?: Category[];
+    user_id?: number;
+    company?: string;
+    slug?: string;
 }
 export interface Skill {
     id: number;

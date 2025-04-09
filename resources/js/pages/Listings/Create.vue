@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
-import StatusContainer from '@/components/StatusContainer.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,7 +33,6 @@ const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('co
 <template>
     <AuthBase title="Create Job listing" description="Enter details below to create a listing">
         <Head title="Create Job Listing" />
-        <StatusContainer :status="flash.success" :errors="flash.errors" />
         <form @submit.prevent="submit" class="flex flex-col gap-6">
             <input type="hidden" name="_token" :value="csrf" />
 
