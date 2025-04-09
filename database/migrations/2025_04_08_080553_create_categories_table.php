@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('parent_id')->unsigned()->nullable();
             $table->string('slug')->unique();
             $table->foreignId('parent_id')
                 ->nullable()  // Top-level categories have no parent

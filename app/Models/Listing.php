@@ -17,6 +17,10 @@ class Listing extends Model
         'description',
         'location',
         'company',
+        'salary',
+        'image',
+        'url',
+        'user_id',
     ];
 
     public function owner()

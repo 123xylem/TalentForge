@@ -24,6 +24,37 @@ export interface SharedData extends PageProps {
     auth: Auth;
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
+    availableSkills?: Skill[];
+    availableCategories?: Category[];
+    userSkills?: Skill[];
+    userCategories?: Category[];
+    listings?: Listing[];
+    flash?: {
+        errors?: any;
+        success?: any;
+    };
+    listing?: Listing;
+    paginatedListings?: PaginatedListing;
+}
+
+export interface PaginatedListing {
+    current_page: number;
+    data: Listing[];
+    first_page_url: string;
+    from: number;
+    last_page: 2;
+    last_page_url: string;
+    links: {
+        url: string;
+        label: string;
+        active: boolean;
+    }[];
+    next_page_url: string;
+    path: string;
+    per_page: number;
+    prev_page_url: null;
+    to: number;
+    total: number;
 }
 
 export interface User {
@@ -31,9 +62,41 @@ export interface User {
     name: string;
     email: string;
     avatar?: string;
+    type?: string;
+    company?: string;
+    bio?: string;
+    website?: string;
+    profile_image?: string;
+    location?: string;
+    cv?: string;
+    phone?: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+}
+
+export interface Listing {
+    id: number;
+    title: string;
+    description: string;
+    salary?: string;
+    location?: string;
+    created_at?: string;
+    updated_at?: string;
+    skills?: Skill[];
+    categories?: Category[];
+    user_id?: number;
+    company?: string;
+    slug?: string;
+}
+export interface Skill {
+    id: number;
+    name: string;
+}
+
+export interface Category {
+    id: number;
+    name: string;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
