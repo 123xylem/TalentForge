@@ -34,6 +34,27 @@ export interface SharedData extends PageProps {
         success?: any;
     };
     listing?: Listing;
+    paginatedListings?: PaginatedListing;
+}
+
+export interface PaginatedListing {
+    current_page: number;
+    data: Listing[];
+    first_page_url: string;
+    from: number;
+    last_page: 2;
+    last_page_url: string;
+    links: {
+        url: string;
+        label: string;
+        active: boolean;
+    }[];
+    next_page_url: string;
+    path: string;
+    per_page: number;
+    prev_page_url: null;
+    to: number;
+    total: number;
 }
 
 export interface User {

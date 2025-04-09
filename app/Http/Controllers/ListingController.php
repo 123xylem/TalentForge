@@ -19,7 +19,7 @@ class ListingController extends Controller
     public function index()
     {
         return Inertia::render('Listings/Index', [
-            'listings' => Listing::all(),
+            'paginatedListings' => Listing::with('skills', 'categories')->paginate(1),
         ]);
     }
 
@@ -96,6 +96,15 @@ class ListingController extends Controller
      */
     public function destroy(Listing $listing)
     {
+        if ($listing->user_id !== Auth::id()) {
+            return redirect()
+                ->route('listings.show', $listing->id)
+                ->with('error', 'You are not authorized to delete this listing!');
+        }
+
+        $listing->skills()->detach();
+        $listing->categories()->detach();
+
         $listing->delete();
 
         return redirect()
