@@ -22,7 +22,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 const page = usePage<SharedData>();
 const {
     auth: { user },
-    flash,
     availableSkills,
     userSkills,
     mustVerifyEmail,
@@ -39,13 +38,37 @@ const form = useForm({
     location: user.location || '',
     phone: user.phone || '',
     skills: (userSkills as Skill[]).map((skill: Skill) => skill.id),
+    cv: user.cv || null,
+    profile_image: user.profile_image || null,
 });
 
+const handleCvChange = (event: Event) => {
+    const file = event.target.files?.[0];
+    console.log(file, 'cv');
+    if (file) {
+        form.cv = file;
+    }
+};
+
+const handleImageChange = (event: Event) => {
+    console.log(form, 'PRE');
+    const file = event.target.files?.[0];
+    if (file) {
+        form.profile_image = file;
+        console.log(form, 'post');
+    } else {
+        console.error('No file selected');
+    }
+};
+
 const submit = () => {
-    form.patch(route('profile.update'), {
+    console.log(form, 'ON submit');
+
+    form.post(route('profile.update'), {
         preserveScroll: true,
     });
 };
+// console.log('Form data before submission:', form);
 </script>
 
 <template>
@@ -54,8 +77,7 @@ const submit = () => {
         <SettingsLayout>
             <div class="flex flex-col space-y-6">
                 <HeadingSmall title="Profile information" description="Update your profile information" />
-
-                <form @submit.prevent="submit" class="space-y-6">
+                <form @submit.prevent="submit" enctype="multipart/form-data" class="space-y-6">
                     <div class="grid gap-2">
                         <Label for="name">Name</Label>
                         <Input id="name" class="mt-1 block w-full" v-model="form.name" required autocomplete="name" placeholder="Full name" />
@@ -87,6 +109,28 @@ const submit = () => {
                             placeholder="+1 (555) 123-4567"
                         />
                         <InputError class="mt-2" :message="form.errors.phone" />
+                    </div>
+
+                    <div v-if="form.type === 'job_hunter'" class="grid gap-2">
+                        <Label for="cv">{{ form.cv ? 'Change CV' : 'Upload CV' }} </Label>
+                        <Input id="cv" type="file" @change="handleCvChange" />
+                        <InputError :message="form.errors.cv" />
+                    </div>
+
+                    <div class="grid gap-2" :class="{ 'grid-cols-3': form.profile_image }">
+                        <div class="col-span-2">
+                            <img
+                                v-if="typeof form.profile_image === 'string'"
+                                :src="`${form.profile_image}`"
+                                alt="Profile image"
+                                class="h-24 w-full rounded-md object-cover"
+                            />
+                        </div>
+                        <div class="col-span-1 grid gap-2">
+                            <Label for="profile_image">{{ form.profile_image ? 'Change Image' : 'Upload Image' }} </Label>
+                            <Input id="profile_image" type="file" @input="handleImageChange" placeholder="hhhhh" />
+                            <InputError :message="form.errors.profile_image" />
+                        </div>
                     </div>
 
                     <div v-if="form.type === 'employer'" class="grid gap-2">

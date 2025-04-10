@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $props = [];
 
-        if ($user->type === 'job_hunter') {
+        if ($user->type === 'job_hunter' || $user->type === 'employer') {
             $props['listings'] = Listing::where('user_id', $user->id)
                 ->with(['skills', 'categories'])
                 ->latest()

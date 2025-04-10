@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Skill;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -19,15 +20,12 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $isEmployer = $request->user()->type === 'employer';
         return Inertia::render('settings/Profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
-            'flash' => [
-                'success' => $request->session()->get('success'),
-            ],
-            'availableSkills' => Skill::all(),
-            'userSkills' => $request->user()->skills,
-
+            'availableSkills' => !$isEmployer ? Skill::all() : [],
+            'userSkills' => !$isEmployer ? $request->user()->skills : [],
         ]);
     }
 
@@ -36,16 +34,29 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
+
+        $imgFilePath = null;
+        if ($request->hasFile('profile_image') && $request->file('profile_image')->isValid()) {
+            $imgFilePath = $request->file('profile_image')->store('uploads', 'public');
+            $user->profile_image = Storage::url($imgFilePath);
+        }
+
+        $cvFilePath = null;
+        if ($request->hasFile('cv') && $request->file('cv')->isValid()) {
+            $cvFilePath = $request->file('cv')->store('uploads', 'public');
+            $user->cv = Storage::url($cvFilePath);
+        }
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
         // Update skills
         if ($request->has('skills')) {
-            $request->user()->skills()->sync($request->skills);
+            $user->skills()->sync($request->skills);
         }
 
         return to_route('profile.edit')->with('success', 'Profile updated successfully');
