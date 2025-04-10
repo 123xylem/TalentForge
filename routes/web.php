@@ -4,14 +4,11 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
-
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
@@ -25,3 +22,13 @@ require __DIR__ . '/auth.php';
 // GET|  listings/{listing}/edit ... listings.edit › ListingController@edit
 Route::resource('listings', ListingController::class);
 Route::resource('categories', CategoryController::class);
+
+
+// Dashboard auth middleware and then let DashboardController handle the routes
+Route::middleware(['auth', 'verified'])
+    ->prefix('dashboard')
+    ->name('dashboard.')
+    ->controller(DashboardController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+    });
