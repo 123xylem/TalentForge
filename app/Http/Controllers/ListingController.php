@@ -19,7 +19,7 @@ class ListingController extends Controller
     public function index()
     {
         return Inertia::render('Listings/Index', [
-            'paginatedListings' => Listing::with('skills', 'categories')->paginate(2),
+            'paginatedListingData' => Listing::with('skills', 'categories')->paginate(6),
         ]);
     }
 

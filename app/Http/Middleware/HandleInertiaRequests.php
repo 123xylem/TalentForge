@@ -55,7 +55,6 @@ class HandleInertiaRequests extends Middleware
                 'errors' => fn() => $request->session()->get('errors'),
                 'success' => fn() => $request->session()->get('success'),
             ],
-            'user_type' => $request->session()->get('user_type')
         ];
     }
 }

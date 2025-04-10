@@ -4,14 +4,11 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
-
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
@@ -27,22 +24,11 @@ Route::resource('listings', ListingController::class);
 Route::resource('categories', CategoryController::class);
 
 
-
-Route::middleware(['auth'])
+// Dashboard auth middleware and then let DashboardController handle the routes
+Route::middleware(['auth', 'verified'])
     ->prefix('dashboard')
-    ->name('listings.')
+    ->name('dashboard.')
+    ->controller(DashboardController::class)
     ->group(function () {
-        Route::get('/dashboard', function () {
-            return Auth::user()->type === 'employer'
-                ? redirect()->route('dashboard.listings')
-                : redirect()->route('dashboard.applications');
-        })->name('dashboard');
-
-        Route::get('/dashboard/listings', [DashboardController::class, 'listings'])
-            ->name('dashboard.listings')
-            ->middleware('can:view-employer-dashboard');
-
-        Route::get('/dashboard/applications', [DashboardController::class, 'applications'])
-            ->name('dashboard.applications')
-            ->middleware('can:view-jobseeker-dashboard');
+        Route::get('/', 'index')->name('index');
     });
