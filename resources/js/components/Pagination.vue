@@ -25,7 +25,7 @@ const getLabel = (label: string) => {
                 :class="{
                     'bg-gray-200 text-gray-900': link.active,
                     'text-gray-600 hover:bg-gray-100': !link.active && link.url,
-                    'cursor-not-allowed text-gray-300': !link.url,
+                    'hidden text-gray-300': !link.url,
                 }"
             >
                 {{ getLabel(link.label) }}

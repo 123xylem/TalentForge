@@ -34,10 +34,10 @@ export interface SharedData extends PageProps {
         success?: any;
     };
     listing?: Listing;
-    paginatedListings?: PaginatedListing;
+    paginatedListingData?: PaginatedListingData;
 }
 
-export interface PaginatedListing {
+export interface PaginatedListingData {
     current_page: number;
     data: Listing[];
     first_page_url: string;
