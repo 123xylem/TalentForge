@@ -25,3 +25,24 @@ require __DIR__ . '/auth.php';
 // GET|  listings/{listing}/edit ... listings.edit › ListingController@edit
 Route::resource('listings', ListingController::class);
 Route::resource('categories', CategoryController::class);
+
+
+
+Route::middleware(['auth'])
+    ->prefix('dashboard')
+    ->name('listings.')
+    ->group(function () {
+        Route::get('/dashboard', function () {
+            return Auth::user()->type === 'employer'
+                ? redirect()->route('dashboard.listings')
+                : redirect()->route('dashboard.applications');
+        })->name('dashboard');
+
+        Route::get('/dashboard/listings', [DashboardController::class, 'listings'])
+            ->name('dashboard.listings')
+            ->middleware('can:view-employer-dashboard');
+
+        Route::get('/dashboard/applications', [DashboardController::class, 'applications'])
+            ->name('dashboard.applications')
+            ->middleware('can:view-jobseeker-dashboard');
+    });
