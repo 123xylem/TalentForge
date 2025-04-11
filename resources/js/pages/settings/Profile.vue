@@ -11,7 +11,7 @@ import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-
+import { ref } from 'vue';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Profile settings',
@@ -42,30 +42,52 @@ const form = useForm({
     profile_image: user.profile_image || null,
 });
 
+const displayedSkills = ref<Skill[]>(userSkills || []);
+const updateDisplayedSkills = (event: Event) => {
+    const target = event.target as HTMLSelectElement;
+    const selectedSkillId = parseInt(target.value);
+    const skillExists = displayedSkills.value.some((skill: Skill) => skill.id === selectedSkillId);
+
+    if (target) {
+        if (!skillExists) {
+            const skillName = availableSkills?.find((skill: Skill) => skill.id === selectedSkillId)?.name || '';
+            displayedSkills.value = [...displayedSkills.value, { id: selectedSkillId, name: skillName }];
+        } else {
+            displayedSkills.value = displayedSkills.value.filter((skill) => skill.id !== selectedSkillId);
+        }
+    }
+};
+
 const handleCvChange = (event: Event) => {
-    const file = event.target.files?.[0];
-    console.log(file, 'cv');
+    const file = event.target?.files?.[0];
     if (file) {
         form.cv = file;
     }
 };
+const formSuccess = ref(false);
+
+const showSuccessMessage = () => {
+    formSuccess.value = true;
+    setTimeout(() => {
+        formSuccess.value = false;
+    }, 2000);
+};
 
 const handleImageChange = (event: Event) => {
-    console.log(form, 'PRE');
-    const file = event.target.files?.[0];
+    const file = event.target?.files?.[0];
     if (file) {
         form.profile_image = file;
-        console.log(form, 'post');
     } else {
         console.error('No file selected');
     }
 };
 
 const submit = () => {
-    console.log(form, 'ON submit');
-
     form.post(route('profile.update'), {
         preserveScroll: true,
+        onSuccess: () => {
+            showSuccessMessage();
+        },
     });
 };
 // console.log('Form data before submission:', form);
@@ -77,7 +99,13 @@ const submit = () => {
         <SettingsLayout>
             <div class="flex flex-col space-y-6">
                 <HeadingSmall title="Profile information" description="Update your profile information" />
-                <form @submit.prevent="submit" enctype="multipart/form-data" class="space-y-6">
+                <form
+                    @submit.prevent="submit"
+                    enctype="multipart/form-data"
+                    class="relative space-y-6 rounded-md border-black p-2"
+                    :class="{ 'border border-green-500': formSuccess }"
+                >
+                    <div v-if="formSuccess" class="absolute right-1 top-1 text-center text-green-500">Updated successfully</div>
                     <div class="grid gap-2">
                         <Label for="name">Name</Label>
                         <Input id="name" class="mt-1 block w-full" v-model="form.name" required autocomplete="name" placeholder="Full name" />
@@ -112,23 +140,22 @@ const submit = () => {
                     </div>
 
                     <div v-if="form.type === 'job_hunter'" class="grid gap-2">
-                        <Label for="cv">{{ form.cv ? 'Change CV' : 'Upload CV' }} </Label>
-                        <Input id="cv" type="file" @change="handleCvChange" />
-                        <InputError :message="form.errors.cv" />
+                        <div class="grid gap-2">
+                            <Label class="cursor-pointer rounded-md underline" for="cv">{{ form.cv ? 'Change CV' : 'Upload CV' }} </Label>
+                            <Input id="cv" type="file" :class="{ hidden: form.cv }" @change="handleCvChange" />
+                            <InputError :message="form.errors.cv" />
+                        </div>
                     </div>
 
-                    <div class="grid gap-2" :class="{ 'grid-cols-3': form.profile_image }">
+                    <div class="grid gap-2" :class="{ 'grid-cols-3': typeof form.profile_image === 'string' }">
                         <div class="col-span-2">
-                            <img
-                                v-if="typeof form.profile_image === 'string'"
-                                :src="`${form.profile_image}`"
-                                alt="Profile image"
-                                class="h-24 w-full rounded-md object-cover"
-                            />
+                            <img :src="`${form.profile_image}`" alt="Profile image" class="h-24 w-full rounded-md object-cover" />
                         </div>
                         <div class="col-span-1 grid gap-2">
-                            <Label for="profile_image">{{ form.profile_image ? 'Change Image' : 'Upload Image' }} </Label>
-                            <Input id="profile_image" type="file" @input="handleImageChange" placeholder="hhhhh" />
+                            <Label class="cursor-pointer rounded-md underline" for="profile_image"
+                                >{{ form.profile_image ? 'Change Image' : 'Upload Image' }}
+                            </Label>
+                            <Input id="profile_image" :class="{ hidden: form.profile_image }" type="file" @input="handleImageChange" />
                             <InputError :message="form.errors.profile_image" />
                         </div>
                     </div>
@@ -159,12 +186,12 @@ const submit = () => {
                             multiple
                             class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                         >
-                            <option v-for="skill in availableSkills" :key="skill.id" :value="skill.id">
+                            <option @click="updateDisplayedSkills" v-for="skill in availableSkills" :key="skill.id" :value="skill.id">
                                 {{ skill.name }}
                             </option>
                         </select>
                         <InputError class="mt-2" :message="form.errors.skills" />
-                        <div v-for="skill in userSkills" :key="skill.id">
+                        <div v-for="skill in displayedSkills" :key="skill.id">
                             <p class="text-sm text-neutral-500">{{ skill.name }}</p>
                         </div>
                     </div>

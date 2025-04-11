@@ -9,7 +9,7 @@ import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 
 const { props } = usePage<SharedData>();
-const { availableSkills, availableCategories, flash } = props;
+const { availableSkills, availableCategories } = props;
 const form = useForm({
     title: '',
     description: '',
