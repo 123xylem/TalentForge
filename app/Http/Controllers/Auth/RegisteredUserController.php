@@ -37,11 +37,23 @@ class RegisteredUserController extends Controller
             'bio' => 'nullable|string|max:255',
             'website' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
-            'profile_image' => 'nullable|string|max:255',
-            'cv' => 'nullable|string|max:255',
+            'profile_image' => 'nullable|file|mimes:jpg,png,pdf,jpeg,webp|max:2048',
+            'cv' => 'nullable|file|mimes:jpg,png,pdf,doc,docx|max:2048',
             'phone' => 'nullable|string|max:255',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'company' => 'nullable|string|max:255',
         ]);
+
+        $imgFilePath = null;
+        if ($request->hasFile('profile_image') && $request->file('profile_image')->isValid()) {
+            $imgFilePath = $request->file('profile_image')->store('uploads', 'public');
+        }
+
+        $cvFilePath = null;
+        if ($request->hasFile('cv') && $request->file('cv')->isValid()) {
+            $cvFilePath = $request->file('cv')->store('uploads', 'public');
+        }
+
 
         $user = User::create([
             'name' => $request->name,
@@ -50,8 +62,8 @@ class RegisteredUserController extends Controller
             'bio' => $request->bio,
             'website' => $request->website,
             'location' => $request->location,
-            'profile_image' => $request->profile_image,
-            'cv' => $request->cv,
+            'profile_image' => $imgFilePath,
+            'cv' => $cvFilePath,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
         ]);

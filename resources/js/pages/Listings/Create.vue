@@ -9,7 +9,7 @@ import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 
 const { props } = usePage<SharedData>();
-const { availableSkills, availableCategories, flash } = props;
+const { availableSkills, availableCategories } = props;
 const form = useForm({
     title: '',
     description: '',
@@ -20,7 +20,7 @@ const form = useForm({
     categories: [],
     slug: '',
 });
-
+//TODO: styling of form
 const submit = () => {
     //TODO make slug unique or remove slug constraint
     form.slug = form.title.toLowerCase().replace(/ /g, '-') + '-' + form.company.toLowerCase().replace(/ /g, '-');
@@ -105,7 +105,7 @@ const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('co
                     </select>
                     <InputError :message="form.errors.categories" />
                 </div>
-
+                <!-- //TODO: Consistent button styling -->
                 <div class="md:col-span-2 lg:col-span-3">
                     <Button type="submit" class="mt-2 w-full" :tabindex="10" :disabled="form.processing">
                         <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />

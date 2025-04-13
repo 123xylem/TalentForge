@@ -11,6 +11,20 @@ import { ref, watch } from 'vue';
 
 const showEmployerFields = ref(false);
 
+const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        form.cv = file;
+    }
+};
+
+const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        form.profile_image = file;
+    }
+};
+
 const form = useForm({
     name: '',
     email: '',
@@ -21,6 +35,8 @@ const form = useForm({
     website: '',
     password: '',
     password_confirmation: '',
+    cv: null,
+    profile_image: null,
 });
 
 watch(
@@ -57,35 +73,35 @@ const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('co
 
             <div class="grid gap-6">
                 <div class="grid gap-2">
-                    <Label for="name">Name</Label>
-                    <Input id="name" type="text" required autofocus :tabindex="1" autocomplete="name" v-model="form.name" placeholder="Full name" />
-                    <InputError :message="form.errors.name" />
-                </div>
-
-                <div class="grid gap-2">
-                    <Label for="email">Email address</Label>
-                    <Input id="email" type="email" required :tabindex="2" autocomplete="email" v-model="form.email" placeholder="email@example.com" />
-                    <InputError :message="form.errors.email" />
-                </div>
-
-                <div class="grid gap-2">
-                    <Label for="phone">Phone number</Label>
-                    <Input id="phone" type="tel" :tabindex="3" autocomplete="tel" v-model="form.phone" placeholder="+1 (555) 123-4567" />
-                    <InputError :message="form.errors.phone" />
-                </div>
-
-                <div class="grid gap-2">
                     <Label for="type">Account type</Label>
                     <select
                         id="type"
                         v-model="form.type"
                         class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                        :tabindex="4"
+                        :tabindex="1"
                     >
                         <option value="job_hunter">Job Seeker</option>
                         <option value="employer">Employer</option>
                     </select>
                     <InputError :message="form.errors.type" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="name">Name</Label>
+                    <Input id="name" type="text" required autofocus :tabindex="2" autocomplete="name" v-model="form.name" placeholder="Full name" />
+                    <InputError :message="form.errors.name" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="email">Email address</Label>
+                    <Input id="email" type="email" required :tabindex="3" autocomplete="email" v-model="form.email" placeholder="email@example.com" />
+                    <InputError :message="form.errors.email" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="phone">Phone number</Label>
+                    <Input id="phone" type="tel" :tabindex="4" autocomplete="tel" v-model="form.phone" placeholder="+1 (555) 123-4567" />
+                    <InputError :message="form.errors.phone" />
                 </div>
 
                 <!-- Employer-specific fields -->
@@ -109,13 +125,27 @@ const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('co
                     </div>
                 </div>
 
+                <div v-if="form.type !== 'employer'" class="space-y-4">
+                    <div class="grid gap-2">
+                        <Label for="cv">CV</Label>
+                        <Input id="cv" type="file" :tabindex="8" @change="handleFileChange" placeholder="CV" />
+                        <InputError :message="form.errors.cv" />
+                    </div>
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="profile_image">Profile Image</Label>
+                    <Input id="profile_image" type="file" @change="handleImageChange" />
+                    <InputError :message="form.errors.profile_image" />
+                </div>
+
                 <div class="grid gap-2">
                     <Label for="password">Password</Label>
                     <Input
                         id="password"
                         type="password"
                         required
-                        :tabindex="8"
+                        :tabindex="9"
                         autocomplete="new-password"
                         v-model="form.password"
                         placeholder="Password"
@@ -129,7 +159,7 @@ const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('co
                         id="password_confirmation"
                         type="password"
                         required
-                        :tabindex="9"
+                        :tabindex="10"
                         autocomplete="new-password"
                         v-model="form.password_confirmation"
                         placeholder="Confirm password"
@@ -137,7 +167,7 @@ const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('co
                     <InputError :message="form.errors.password_confirmation" />
                 </div>
 
-                <Button type="submit" class="mt-2 w-full" :tabindex="10" :disabled="form.processing">
+                <Button type="submit" class="mt-2 w-full" :tabindex="11" :disabled="form.processing">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     Create account
                 </Button>

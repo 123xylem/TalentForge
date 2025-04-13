@@ -19,7 +19,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const page = usePage<SharedData>();
-const { flash, listing, availableSkills, availableCategories } = page.props;
+const { listing, availableSkills, availableCategories } = page.props;
 
 // Initialize form directly with the data
 const form = useForm({

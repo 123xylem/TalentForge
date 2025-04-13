@@ -66,9 +66,9 @@ export interface User {
     company?: string;
     bio?: string;
     website?: string;
-    profile_image?: string;
+    profile_image?: File | string | null;
     location?: string;
-    cv?: string;
+    cv?: File | string | null;
     phone?: string;
     email_verified_at: string | null;
     created_at: string;

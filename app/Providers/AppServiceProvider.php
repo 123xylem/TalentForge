@@ -22,13 +22,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Inertia::share([
-            'userType' => function () { // Share the user type
+            'userType' => function () {
                 if (Auth::check()) {
                     return Auth::user()->type;
                 }
-
-                return null; // Or a default value if the user is not logged in
-            },
+                return null;
+            }
         ]);
     }
 }
