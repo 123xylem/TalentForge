@@ -47,7 +47,7 @@ class ListingController extends Controller
 
         return redirect()
             ->route('listings.show', $listing->id)
-            ->with('success', 'Listing created successfully!');
+            ->with('flash', ['success' => 'Listing created successfully!']);
     }
 
     /**
@@ -88,7 +88,7 @@ class ListingController extends Controller
 
         return redirect()
             ->route('listings.show', $listing->id)
-            ->with('success', 'Listing updated successfully!');
+            ->with('flash', ['success' => 'Listing updated successfully!']);
     }
 
     /**
@@ -99,7 +99,7 @@ class ListingController extends Controller
         if ($listing->user_id !== Auth::id()) {
             return redirect()
                 ->route('listings.show', $listing->id)
-                ->with('error', 'You are not authorized to delete this listing!');
+                ->with('flash', ['error' => 'You are not authorized to delete this listing!']);
         }
 
         $listing->skills()->detach();
@@ -109,6 +109,6 @@ class ListingController extends Controller
 
         return redirect()
             ->route('listings.index')
-            ->with('success', 'Listing deleted successfully!');
+            ->with('flash', ['success' => 'Listing deleted successfully!']);
     }
 }

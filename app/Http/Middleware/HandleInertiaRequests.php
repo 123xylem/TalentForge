@@ -39,10 +39,23 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        // Get flash data from session
+        $flashData = $request->session()->get('flash', []);
+        $flash = [
+            'errors' => $request->session()->get('errors') ? $request->session()->get('errors')->getBag('default')->getMessages() : null,
+            'success' => $flashData['success'] ?? null,
+            'error' => $flashData['error'] ?? null,
+        ];
+
+        // // Have to keep flash data for next request if it exists or profile update wont work
+        // if ($flash['success'] || $flash['errors']) {
+        //     $request->session()->reflash();
+        // }
+
+        //Share session data to inertia
         return [
             ...parent::share($request),
             'name' => config('app.name'),
-            'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user(),
             ],
@@ -51,10 +64,7 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'flash' => [
-                'errors' => fn() => $request->session()->get('errors'),
-                'success' => fn() => $request->session()->get('success'),
-            ],
+            'flash' => $flash,
         ];
     }
 }
