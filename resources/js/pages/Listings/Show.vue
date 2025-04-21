@@ -1,13 +1,18 @@
 <script setup lang="ts">
+import ListingApplicationModal from '@/components/Listing/ListingApplicationModal.vue';
 import { useTextFormatter } from '@/composables/useTextFormatter';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { capitalize, ref } from 'vue';
 
 const { truncate } = useTextFormatter();
 
 const page = usePage<SharedData>();
-const { listing, isOwner } = page.props;
+const { listing, isOwner, auth, userApplicationStatus = null, flash } = page.props;
+const user = auth.user;
+console.log(flash, userApplicationStatus);
+// const userApplied = !user.status.includes('read', 'unread');
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,27 +25,49 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const form = useForm({});
+// const deleteListing = () => {
+//     if (confirm('Are you sure you want to delete this listing?')) {
+//         form.delete(route('listings.destroy', listing?.id));
+//     }
+// };
+const modalRef = ref<InstanceType<typeof ListingApplicationModal> | null>(null);
 
-const deleteListing = () => {
-    if (confirm('Are you sure you want to delete this listing?')) {
-        form.delete(route('listings.destroy', listing?.id));
+const openModal = () => {
+    modalRef.value?.openModal();
+};
+
+const closeModal = () => {
+    modalRef.value?.closeModal();
+};
+
+const toggleModal = () => {
+    if (isModalOpen.value) {
+        closeModal();
+    } else {
+        openModal();
     }
 };
+
+const isModalOpen = ref(false);
 </script>
 
 <template>
     <Head title="Listing" />
     <AppLayout :breadcrumbs="breadcrumbs">
+        <ListingApplicationModal ref="modalRef" :listing_id="listing?.id" :user="user" v-model:is-open="isModalOpen" />
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="flex flex-col gap-4">
                 <h1 class="text-2xl font-semibold">
                     {{ listing?.title }}
-                    <span class="">
-                        <button class="rounded-full bg-blue-500 px-2 py-1 text-sm text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600">
-                            Apply
+                    <span v-if="!isOwner && user.type === 'job_hunter' && !userApplicationStatus" class="">
+                        <button
+                            @click="toggleModal"
+                            class="rounded-full bg-blue-500 px-2 py-1 text-sm text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
+                        >
+                            {{ isModalOpen ? 'Cancel' : 'Apply' }}
                         </button>
                     </span>
+                    <span class="text-sm text-neutral-500"> {{ capitalize(userApplicationStatus ?? '') }} </span>
                 </h1>
                 <p class="text-sm text-neutral-500">{{ listing?.description }}</p>
                 <p class="text-sm text-neutral-500">{{ listing?.salary }}</p>

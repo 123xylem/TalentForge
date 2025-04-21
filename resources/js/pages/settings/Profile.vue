@@ -27,7 +27,7 @@ const {
     mustVerifyEmail,
     status,
 } = page.props;
-
+console.log(user);
 const form = useForm({
     name: user.name,
     email: user.email,
@@ -149,7 +149,7 @@ const submit = () => {
 
                     <div class="grid gap-2" :class="{ 'grid-cols-3': typeof form.profile_image === 'string' }">
                         <div class="col-span-2">
-                            <img :src="`${form.profile_image}`" alt="Profile image" class="h-24 w-full rounded-md object-cover" />
+                            <img :src="`${form.profile_image}`" alt="Profile image" class="h-24 w-full rounded-md object-contain" />
                         </div>
                         <div class="col-span-1 grid gap-2">
                             <Label class="cursor-pointer rounded-md underline" for="profile_image"

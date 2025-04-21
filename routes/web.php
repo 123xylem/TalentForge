@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ListingApplicationController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -22,7 +23,14 @@ require __DIR__ . '/auth.php';
 // GET|  listings/{listing}/edit ... listings.edit › ListingController@edit
 Route::resource('listings', ListingController::class);
 Route::resource('categories', CategoryController::class);
-
+Route::middleware(['auth', 'verified'])
+    ->prefix('listing-applications')
+    ->name('listing-applications.')
+    ->controller(ListingApplicationController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('my-applications');
+        Route::post('/', 'store')->name('store');
+    });
 
 // Dashboard auth middleware and then let DashboardController handle the routes
 Route::middleware(['auth', 'verified'])

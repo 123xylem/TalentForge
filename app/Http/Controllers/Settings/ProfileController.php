@@ -38,25 +38,27 @@ class ProfileController extends Controller
 
         $user->fill($request->validated());
         $imgFilePath = null;
+        //TODO save files with filename as [name, url]
         if ($request->hasFile('profile_image') && $request->file('profile_image')->isValid()) {
-            if (!$request->file('profile_image') === 'string') {
-                dd($request->file('profile_image'));
-                $imgFilePath = $request->file('profile_image')->store('uploads', 'public');
-                $user->profile_image = Storage::url($imgFilePath);
-            }
+            // if (!$request->file('profile_image') === 'string') {
+            $imgFilePath = $request->file('profile_image')->store('uploads', 'public');
+            $user->profile_image = Storage::url($imgFilePath);
+            // dd($user->profile_image, 'image');
+            //     }
+            // } else {
+            //     dd($request->profile_image, 'not image');
+            //     $user->profile_image = $request->profile_image;
         }
 
         $cvFilePath = null;
         if ($request->hasFile('cv') && $request->file('cv')->isValid()) {
-            if (!$request->file('cv') === 'string') {
-                $cvFilePath = $request->file('cv')->store('uploads', 'public');
-                $user->cv = Storage::url($cvFilePath);
-            }
+            // if (!$request->file('cv') === 'string') {
+            $cvFilePath = $request->file('cv')->store('uploads', 'public');
+            $user->cv = Storage::url($cvFilePath);
         }
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
-
         $user->save();
 
         // Update skills
@@ -65,8 +67,7 @@ class ProfileController extends Controller
         }
 
         // Set flash data
-        $request->session()->flash('flash', ['success' => 'Profile updated successfully']);
-
+        $request->session()->flash('success', 'Profile updated successfully');
         return to_route('profile.edit');
     }
 

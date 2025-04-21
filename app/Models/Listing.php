@@ -38,4 +38,9 @@ class Listing extends Model
     {
         return $this->belongsToMany(Category::class, 'listing_category');
     }
+
+    public function applications()
+    {
+        return $this->hasMany(ListingApplication::class);
+    }
 }

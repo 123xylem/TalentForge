@@ -47,7 +47,8 @@ class ListingController extends Controller
 
         return redirect()
             ->route('listings.show', $listing->id)
-            ->with('flash', ['success' => 'Listing created successfully!']);
+            ->with('flash.success', 'Listing created successfully!')
+            ->with('userApplicationStatus', 'applied');
     }
 
     /**
@@ -55,14 +56,15 @@ class ListingController extends Controller
      */
     public function show(Listing $listing)
     {
+        $userApplicationStatus = $listing->applications->where('user_id', Auth::id())->first()->status ?? null;
         return Inertia::render('Listings/Show', [
             'listing' => $listing,
+            'userApplicationStatus' => $userApplicationStatus,
             'isOwner' => $listing->user_id === Auth::id(),
             'skills' => $listing->skills,
             'categories' => $listing->categories,
         ]);
     }
-
     /**
      * Show the form for editing the specified resource.
      */
