@@ -89,6 +89,18 @@ export interface Listing {
     company?: string;
     slug?: string;
 }
+export interface ListingApplication {
+    id: number;
+    listing_id: number;
+    user_id: number;
+    status: string;
+    listing: Listing;
+    status: string;
+    cv: File | string | null;
+    created_at: string;
+    updated_at: string;
+    cover_letter: string;
+}
 export interface Skill {
     id: number;
     name: string;
