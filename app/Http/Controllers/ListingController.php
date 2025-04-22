@@ -67,7 +67,7 @@ class ListingController extends Controller
             $listingApplications = $listing->applications;
             $listingApplicationsData = [];
             foreach ($listingApplications as $listingApplication) {
-                $applicant = $listingApplication->applicants;
+                $applicant = $listingApplication->applicant;
                 $name = $applicant->name;
                 $email = $applicant->email;
                 $phone = $applicant->phone;

@@ -25,7 +25,7 @@ class ListingApplication extends Model
     }
 
     //Get ID of all applicants
-    public function applicants()
+    public function applicant()
     {
         return $this->belongsTo(User::class, 'user_id');
     }

@@ -55,47 +55,50 @@ class ListingApplicationController extends Controller
      */
     public function show(ListingApplication $listingApplication)
     {
-        $applicants = $listingApplication->applicants()->get();
-        $applicantsData = [];
-        foreach ($applicants as $applicant) {
-            $applicantsData[] = [
-                'cv' => Storage::url($listingApplication->cv),
-                'cover_letter' => $listingApplication->cover_letter,
-                'status' => $listingApplication->status,
-                'created_at' => $listingApplication->created_at,
-                'name' => $applicant->name,
-                'email' => $applicant->email,
-                'phone' => $applicant->phone,
-                'address' => $applicant->address,
-
-            ];
-        }
+        $applicant = $listingApplication->applicant;
+        $skills = $applicant->skills;
+        $applicant['skills'] = $skills;
         return Inertia::render('ListingApplications/Show', [
             'listingApplication' => $listingApplication,
-            'applicants' => $applicantsData,
+            'applicant' => $applicant,
+            'listing' => $listingApplication->listing,
+            'skills' => $skills,
         ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(listing_application $listing_application)
+    public function edit(ListingApplication $listingApplication)
     {
-        //
+
+        return Inertia::render('ListingApplications/Edit', [
+            'listingApplication' => $listingApplication,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, listing_application $listing_application)
+    public function update(Request $request, ListingApplication $listingApplication)
     {
-        //
+        //  
+        $action = $request->action === 'progress' ? 'shortlisted' : 'rejected';
+        $listingApplication->status = $action;
+
+        //TODO: send message to applicant
+        // if ($action === 'shortlisted') {
+        //     $user = $listingApplication->applicant;
+        //     $user->sendMessage('You have been ' . $action . ' for the ' . $listingApplication->listing->title . ' ' . $listingApplication->listing->listing_id . ' position.');
+        // }
+        $listingApplication->save();
+        return to_route('listing-applications.show', $listingApplication->id)->with('flash', ['success' => 'Application updated successfully!']);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(listing_application $listing_application)
+    public function destroy(ListingApplication $listingApplication)
     {
         //
     }
