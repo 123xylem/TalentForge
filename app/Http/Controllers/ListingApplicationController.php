@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\ListingApplication;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class ListingApplicationController extends Controller
 {
@@ -23,8 +25,7 @@ class ListingApplicationController extends Controller
      */
     public function store(Request $request)
     {
-        $cvPath = $request->cv ? Storage::url($request->cv) : null;
-
+        $cvPath = $request->cv ? $request->cv : null;
         // Build validation rules
         $rules = [
             'cover_letter' => ['nullable', 'string', 'max:1000', 'min:5'],
@@ -39,22 +40,40 @@ class ListingApplicationController extends Controller
         }
 
         $request->validate($rules);
-        $listing_application = new ListingApplication();
-        $listing_application->listing_id = $request->listing_id;
-        $listing_application->user_id = Auth::user()->id;
-        $listing_application->cv = $cvPath;
-        $listing_application->cover_letter = $request->cover_letter;
-        $listing_application->status = 'applied';
-        $listing_application->save();
+        $listingApplication = new ListingApplication();
+        $listingApplication->listing_id = $request->listing_id;
+        $listingApplication->user_id = Auth::user()->id;
+        $listingApplication->cv = $cvPath;
+        $listingApplication->cover_letter = $request->cover_letter;
+        $listingApplication->status = 'applied';
+        $listingApplication->save();
         return to_route('listings.show', $request->listing_id)->with('flash', ['success' => 'Aplication Submitted successfully!']);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(ListingApplication $listing_application)
+    public function show(ListingApplication $listingApplication)
     {
-        //
+        $applicants = $listingApplication->applicants()->get();
+        $applicantsData = [];
+        foreach ($applicants as $applicant) {
+            $applicantsData[] = [
+                'cv' => Storage::url($listingApplication->cv),
+                'cover_letter' => $listingApplication->cover_letter,
+                'status' => $listingApplication->status,
+                'created_at' => $listingApplication->created_at,
+                'name' => $applicant->name,
+                'email' => $applicant->email,
+                'phone' => $applicant->phone,
+                'address' => $applicant->address,
+
+            ];
+        }
+        return Inertia::render('ListingApplications/Show', [
+            'listingApplication' => $listingApplication,
+            'applicants' => $applicantsData,
+        ]);
     }
 
     /**

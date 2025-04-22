@@ -27,7 +27,10 @@ const {
     mustVerifyEmail,
     status,
 } = page.props;
-console.log(user);
+
+const cvChanged = ref(false);
+const imageChanged = ref(false);
+
 const form = useForm({
     name: user.name,
     email: user.email,
@@ -38,8 +41,8 @@ const form = useForm({
     location: user.location || '',
     phone: user.phone || '',
     skills: (userSkills as Skill[]).map((skill: Skill) => skill.id),
-    cv: user.cv || null,
-    profile_image: user.profile_image || null,
+    cv: null,
+    profile_image: null,
 });
 
 const displayedSkills = ref<Skill[]>(userSkills || []);
@@ -57,8 +60,9 @@ const updateDisplayedSkills = (event: Event) => {
         }
     }
 };
-
+console.log(user.cv, user.profile_image);
 const handleCvChange = (event: Event) => {
+    cvChanged.value = true;
     const file = event.target?.files?.[0];
     if (file) {
         form.cv = file;
@@ -74,6 +78,7 @@ const showSuccessMessage = () => {
 };
 
 const handleImageChange = (event: Event) => {
+    imageChanged.value = true;
     const file = event.target?.files?.[0];
     if (file) {
         form.profile_image = file;
@@ -141,21 +146,21 @@ const submit = () => {
 
                     <div v-if="form.type === 'job_hunter'" class="grid gap-2">
                         <div class="grid gap-2">
-                            <Label class="cursor-pointer rounded-md underline" for="cv">{{ form.cv ? 'Change CV' : 'Upload CV' }} </Label>
-                            <Input id="cv" type="file" :class="{ hidden: form.cv }" @change="handleCvChange" />
+                            <Label class="cursor-pointer rounded-md underline" for="cv">{{ user.cv ? 'Change CV' : 'Upload CV' }} </Label>
+                            <Input id="cv" type="file" :class="{ hidden: user.cv }" @change="handleCvChange" />
                             <InputError :message="form.errors.cv" />
                         </div>
                     </div>
 
-                    <div class="grid gap-2" :class="{ 'grid-cols-3': typeof form.profile_image === 'string' }">
+                    <div class="grid gap-2" :class="{ 'grid-cols-3': typeof user.profile_image === 'string' }">
                         <div class="col-span-2">
-                            <img :src="`${form.profile_image}`" alt="Profile image" class="h-24 w-full rounded-md object-contain" />
+                            <img :src="`${user.profile_image}`" alt="Profile image" class="h-24 w-full rounded-md object-contain" />
                         </div>
                         <div class="col-span-1 grid gap-2">
                             <Label class="cursor-pointer rounded-md underline" for="profile_image"
-                                >{{ form.profile_image ? 'Change Image' : 'Upload Image' }}
+                                >{{ user.profile_image ? 'Change Image' : 'Upload Image' }}
                             </Label>
-                            <Input id="profile_image" :class="{ hidden: form.profile_image }" type="file" @input="handleImageChange" />
+                            <Input id="profile_image" :class="{ hidden: user.profile_image }" type="file" @input="handleImageChange" />
                             <InputError :message="form.errors.profile_image" />
                         </div>
                     </div>

@@ -9,9 +9,9 @@ import { capitalize, ref } from 'vue';
 const { truncate } = useTextFormatter();
 
 const page = usePage<SharedData>();
-const { listing, isOwner, auth, userApplicationStatus = null, flash } = page.props;
+const { listing, isOwner, auth, userApplicationStatus = null, listingApplications = [] } = page.props;
 const user = auth.user;
-console.log(flash, userApplicationStatus);
+console.log('here', listingApplications, userApplicationStatus);
 // const userApplied = !user.status.includes('read', 'unread');
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -24,7 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: `/listings/${listing?.id}`,
     },
 ];
-
+//TODO: Delete listing
 // const deleteListing = () => {
 //     if (confirm('Are you sure you want to delete this listing?')) {
 //         form.delete(route('listings.destroy', listing?.id));
@@ -56,6 +56,25 @@ const isModalOpen = ref(false);
     <AppLayout :breadcrumbs="breadcrumbs">
         <ListingApplicationModal ref="modalRef" :listing_id="listing?.id" :user="user" v-model:is-open="isModalOpen" />
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+            <div v-if="isOwner && listingApplications?.length > 0">
+                <h2 class="text-lg font-semibold">Applications</h2>
+                <div class="flex flex-col gap-2">
+                    <div v-for="application in listingApplications" :key="application.id" class="rounded-lg border-2 border-white p-2">
+                        <Link :href="route('listing-applications.show', application.id)">
+                            <div class="flex flex-wrap gap-2">
+                                <h3 class="text-lg font-semibold">Applicant: {{ application.name }}</h3>
+                                <p class="text-sm text-neutral-500">Email: {{ application.email }}</p>
+                                <p class="text-sm text-neutral-500">Phone: {{ application.phone }}</p>
+                                <p class="text-sm text-neutral-500">Address: {{ application.address }}</p>
+                                <p class="text-sm text-neutral-500">Status: {{ application.status }}</p>
+                                <p class="text-sm text-neutral-500">Applied at: {{ application.created_at }}</p>
+                                <p class="text-sm text-neutral-500">CV: {{ application.cv }}</p>
+                                <p class="text-sm text-neutral-500">Cover Letter: {{ application.cover_letter }}</p>
+                            </div>
+                        </Link>
+                    </div>
+                </div>
+            </div>
             <div class="flex flex-col gap-4">
                 <h1 class="text-2xl font-semibold">
                     {{ listing?.title }}

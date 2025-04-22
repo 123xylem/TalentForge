@@ -30,6 +30,7 @@ Route::middleware(['auth', 'verified'])
     ->group(function () {
         Route::get('/', 'index')->name('my-applications');
         Route::post('/', 'store')->name('store');
+        Route::get('/{listingApplication}', 'show')->name('show');
     });
 
 // Dashboard auth middleware and then let DashboardController handle the routes

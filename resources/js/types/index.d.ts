@@ -35,6 +35,7 @@ export interface SharedData extends PageProps {
     };
     listing?: Listing;
     paginatedListingData?: PaginatedListingData;
+    listingApplications?: ListingApplication[];
 }
 
 export interface PaginatedListingData {
@@ -91,15 +92,17 @@ export interface Listing {
 }
 export interface ListingApplication {
     id: number;
-    listing_id: number;
     user_id: number;
+    cv: string;
+    cover_letter: string;
     status: string;
-    listing: Listing;
-    status: string;
-    cv: File | string | null;
     created_at: string;
     updated_at: string;
-    cover_letter: string;
+    listing: Listing;
+    name?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
 }
 export interface Skill {
     id: number;
