@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use App\Notifications\ListingApplicationUpdate;
 
 class ListingApplicationController extends Controller
 {
@@ -85,12 +86,9 @@ class ListingApplicationController extends Controller
         //  
         $action = $request->action === 'progress' ? 'shortlisted' : 'rejected';
         $listingApplication->status = $action;
+        $applicant = $listingApplication->applicant;
 
-        //TODO: send message to applicant
-        // if ($action === 'shortlisted') {
-        //     $user = $listingApplication->applicant;
-        //     $user->sendMessage('You have been ' . $action . ' for the ' . $listingApplication->listing->title . ' ' . $listingApplication->listing->listing_id . ' position.');
-        // }
+        $applicant->notify(new ListingApplicationUpdate($listingApplication, $applicant));
         $listingApplication->save();
         return to_route('listing-applications.show', $listingApplication->id)->with('flash', ['success' => 'Application updated successfully!']);
     }

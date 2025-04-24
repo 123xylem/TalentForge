@@ -71,10 +71,15 @@ const closeModal = () => {
 
 defineExpose({ openModal, closeModal });
 
-//TODO: Handle AJax redirects with flash messages/Prop updates
+//TODO: Handle AJAX redirects with flash messages/Prop updates
+//MAYBE FIXED with preserveState: false (to ensure rerender... plus flash message should be : ->with('flash', [
+//     'success' => 'Notification marked as read',
+// ])
 const submit = () => {
     console.log('submit', form.data());
     form.post(route('listing-applications.store'), {
+        preserveScroll: true,
+        preserveState: false,
         onSuccess: () => {
             closeModal();
             emit('update:is-open', false);

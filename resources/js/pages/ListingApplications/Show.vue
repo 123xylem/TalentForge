@@ -1,12 +1,18 @@
 <script setup lang="ts">
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import StatusLabel from '@/components/StatusLabel.vue';
+import { useTextFormatter } from '@/composables/useTextFormatter';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type SharedData, type Skill } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { capitalize } from 'vue';
+import { FileText } from 'lucide-vue-next';
+import { ref } from 'vue';
+
+const { truncate } = useTextFormatter();
 const page = usePage<SharedData>();
-const { listing, auth, userApplicationStatus = null, flash, listingApplication, applicants } = page.props;
+const { listing, auth, listingApplication } = page.props;
 const user = auth.user;
-console.log(listingApplication, applicants);
+console.log(listingApplication);
 // const userApplied = !user.status.includes('read', 'unread');
 const shortlisted = listingApplication?.status === 'shortlisted';
 const rejected = listingApplication?.status === 'rejected';
@@ -29,11 +35,41 @@ const rejectForm = useForm({
     _method: 'patch',
     action: 'reject',
 });
-
 const progressForm = useForm({
     _method: 'patch',
     action: 'progress',
 });
+
+const confirmModal = ref(false);
+const modalAction = ref('');
+const confirmModalOpen = (action: string) => {
+    confirmModal.value = true;
+    modalAction.value = action;
+    console.log(modalAction.value, 'modalAction', action);
+};
+
+const confirmModalClose = () => {
+    confirmModal.value = false;
+    modalAction.value = '';
+};
+
+const submitForm = (action: string) => {
+    if (action === 'reject') {
+        rejectForm.patch(route('listing-applications.update', listingApplication?.id), {
+            onSuccess: () => {
+                window.location.href = route('listings.show', listingApplication?.listing?.id);
+                console.log('rejectForm success');
+            },
+        });
+    } else {
+        progressForm.patch(route('listing-applications.update', listingApplication?.id), {
+            onSuccess: () => {
+                window.location.href = route('listings.show', listingApplication?.listing?.id);
+                console.log('progressForm success');
+            },
+        });
+    }
+};
 </script>
 
 <template>
@@ -45,12 +81,9 @@ const progressForm = useForm({
                 <div class="relative flex flex-col gap-2">
                     <div class="status-icon absolute right-2 top-2">
                         <div class="status-icon-inner">
-                            <div class="status-icon-inner-inner p-2" :class="shortlisted ? 'bg-green-500' : rejected ? 'bg-red-500' : 'bg-gray-500'">
-                                {{ capitalize(listingApplication?.status) }}
-                            </div>
+                            <StatusLabel v-if="listingApplication?.status" :status="listingApplication?.status" />
                         </div>
                     </div>
-                    <!-- //TODO: show cv download link -->
                     <p class="text-sm text-neutral-500">Name: {{ listingApplication?.applicant?.name }}</p>
                     <p class="text-sm text-neutral-500">Email: {{ listingApplication?.applicant?.email }}</p>
                     <p class="text-sm text-neutral-500">Phone: {{ listingApplication?.applicant?.phone }}</p>
@@ -59,14 +92,15 @@ const progressForm = useForm({
                     <p class="text-sm text-neutral-500">
                         Skills: {{ listingApplication?.applicant?.skills?.map((skill: Skill) => skill.name).join(', ') }}
                     </p>
-                    <p class="text-sm text-neutral-500">CV: {{ listingApplication?.cv }}</p>
-                    <p class="text-sm text-neutral-500">Cover Letter: {{ listingApplication?.cover_letter }}</p>
+                    <p class="text-sm text-neutral-500">
+                        CV: <a :href="listingApplication?.cv" target="_blank"><FileText class="h-4 w-4" /> Download CV</a>
+                    </p>
+                    <p class="text-sm text-neutral-500">Cover Letter: {{ truncate(listingApplication?.cover_letter, 100) }}</p>
                 </div>
             </div>
 
-            <!-- //TODO: add confirmation modal -->
             <div class="buttons-row flex gap-2 rounded-lg">
-                <form v-if="!shortlisted" @submit.prevent="progressForm.patch(route('listing-applications.update', listingApplication?.id))">
+                <form v-if="!shortlisted" @submit.prevent="confirmModalOpen('progress')">
                     <button
                         type="submit"
                         class="rounded-full bg-blue-500 px-2 py-1 text-sm text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
@@ -74,12 +108,20 @@ const progressForm = useForm({
                         Progress Applicant
                     </button>
                 </form>
-                <form v-if="!rejected" @submit.prevent="rejectForm.patch(route('listing-applications.update', listingApplication?.id))">
+                <form v-if="!rejected" @submit.prevent="confirmModalOpen('reject')">
                     <button type="submit" class="rounded-full bg-red-500 px-2 py-1 text-sm text-white hover:cursor-pointer hover:bg-red-600">
                         Reject Applicant
                     </button>
                 </form>
             </div>
         </div>
+        <ConfirmationModal
+            :is-open="confirmModal"
+            @confirm="submitForm(modalAction)"
+            @cancel="confirmModalClose"
+            :title="`Are you sure you want to ${modalAction} this application?`"
+            :description="`This action cannot be undone.`"
+            :confirmModal="confirmModal"
+        />
     </AppLayout>
 </template>

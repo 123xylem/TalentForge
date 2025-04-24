@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import StatusLabel from '@/components/StatusLabel.vue';
 import { useTextFormatter } from '@/composables/useTextFormatter';
 import { type Listing, type ListingApplication } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { capitalize, computed, defineProps } from 'vue';
-
+import { computed, defineProps } from 'vue';
 const { truncate } = useTextFormatter();
 
 const props = defineProps<{
@@ -23,7 +23,9 @@ const listingData = computed(() => (props.listing.listing?.id ? props.listing.li
             <h2 class="text-lg font-semibold">
                 {{ listingData.title }}
             </h2>
-            <p v-if="listing.status" class="absolute right-4 top-4 text-xs text-neutral-500">{{ capitalize(listing.status) }}</p>
+            <p v-if="listing.status" class="absolute right-4 top-4 text-xs text-neutral-500">
+                <StatusLabel :status="listing.status" />
+            </p>
 
             <div v-if="listingData.skills" class="flex flex-row gap-2">
                 <div

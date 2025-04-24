@@ -5,7 +5,7 @@ import { ref } from 'vue';
 const isVisible = ref(true);
 const { props } = usePage<SharedData>();
 const flash = props.flash;
-
+console.log(flash, 'flash');
 const clearMessage = () => {
     isVisible.value = false;
 };
