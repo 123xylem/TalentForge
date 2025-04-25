@@ -3,16 +3,14 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const notifications = ref([]);
-const unreadCount = ref(0);
 const showNotifications = ref(false);
 
 // Get notifications from auth user
 notifications.value = usePage().props.auth.user.notifications;
-unreadCount.value = usePage().props.auth.user.unread_notifications_count;
 
 // Use computed instead of watch
 const unreadNotifications = computed(() => notifications.value.filter((notification) => notification.read_at === null));
-console.log(notifications.value, unreadNotifications.value, 'a');
+console.log(notifications.value, 'unread:', unreadNotifications.value, 'a');
 
 const form = useForm({
     notification_id: '',
@@ -26,14 +24,14 @@ const submit = (id: string) => {
         preserveState: false,
         onSuccess: () => {
             notifications.value = usePage().props.auth.user.notifications;
-            unreadCount.value = usePage().props.auth.user.unread_notifications_count;
         },
     });
 };
 </script>
+<!-- //TODO add url to notifications -->
 
 <template>
-    <div v-if="unreadCount" class="relative ml-auto">
+    <div v-if="unreadNotifications.length > 0" class="relative ml-auto">
         <button @click="showNotifications = !showNotifications" class="relative p-2">
             <span class="sr-only">Notifications</span>
             <svg class="h-6 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -45,7 +43,7 @@ const submit = (id: string) => {
                 />
             </svg>
             <span class="absolute -right-1 -top-1 rounded-full bg-red-500 px-2 py-1 text-xs text-white">
-                {{ unreadCount }}
+                {{ unreadNotifications?.length }}
             </span>
         </button>
         <!-- Dropdown -->
@@ -53,11 +51,14 @@ const submit = (id: string) => {
             <div class="py-1">
                 <div v-for="notification in unreadNotifications" :key="notification.id" class="px-4 py-2">
                     <form class="flex items-center gap-2 text-gray-900 hover:cursor-pointer" @click="submit(notification.id)" method="POST">
-                        <div class="text-sm text-gray-900">
+                        <div v-if="!notification.data.employerAction" class="text-sm text-gray-900">
                             Application for {{ notification.data.title }} at {{ notification.data.company }} has been {{ notification.data.status }}
                         </div>
+                        <div v-else class="text-sm text-gray-900">
+                            New Application for {{ notification.data.title }} at {{ notification.data.company }}
+                        </div>
                         <div class="text-xs text-gray-500">
-                            {{ new Date(notification.created_at).toLocaleDateString() }}
+                            {{ new Date(notification.created_at).toLocaleString() }}
                         </div>
                         <input
                             @click="submit(notification.id)"

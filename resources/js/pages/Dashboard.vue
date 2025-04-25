@@ -22,7 +22,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     <AppLayout :breadcrumbs="breadcrumbs">
         <div v-if="listings" class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <h1 class="text-2xl font-semibold">Your {{ isEmployer ? 'Listings' : 'Applications' }}</h1>
-            <ListingBlock :listings="listings" :rows="{ rows }" />
+            <ListingBlock :listings="listings" :rows="rows" />
         </div>
         <div v-else class="flex flex-col gap-4 rounded-xl p-4">
             <h1 class="text-2xl font-semibold">No listings found</h1>

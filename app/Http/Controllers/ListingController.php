@@ -50,8 +50,8 @@ class ListingController extends Controller
 
         return redirect()
             ->route('listings.show', $listing->id)
-            ->with('flash.success', 'Listing created successfully!')
-            ->with('userApplicationStatus', 'applied');
+            ->with('flash.success', 'Listing created successfully!');
+        // ->with('userApplicationStatus', 'applied');
     }
 
     /**

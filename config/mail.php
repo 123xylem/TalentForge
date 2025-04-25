@@ -63,6 +63,7 @@ return [
 
         'resend' => [
             'transport' => 'resend',
+
         ],
 
         'sendmail' => [
@@ -109,8 +110,11 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', 'cucullen111@gmail.com'),
+        'name' => env('MAIL_FROM_NAME', 'Talent Forge - Chris'),
     ],
+
+    'reply_to' => ['address' => 'cucullen111@gmail.com', 'name' => 'Talent Forge - Chris'],
+
 
 ];
