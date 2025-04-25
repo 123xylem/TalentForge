@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Notifications\ListingApplicationUpdate;
 
 class User extends Authenticatable
 {
@@ -22,6 +23,7 @@ class User extends Authenticatable
         'cv',
         'phone',
     ];
+
 
     // The type of user
     public function isEmployer()
@@ -47,7 +49,7 @@ class User extends Authenticatable
         if ($this->isEmployer()) {
             return [];
         }
-        return $this->hasMany(Application::class);
+        return $this->hasMany(ListingApplication::class);
     }
 
     public function alerts()
@@ -67,6 +69,15 @@ class User extends Authenticatable
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+    public function markNotificationAsRead($notificationId)
+    {
+        return $this->notifications()
+            ->where('id', $notificationId)
+            ->markAsRead();
+    }
+
+
 
 
     /**

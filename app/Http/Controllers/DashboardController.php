@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Listing;
-use App\Models\Application;
+use App\Models\ListingApplication;
 use App\Models\Category;
 use App\Models\Skill;
 use Inertia\Response;
@@ -20,15 +20,15 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $props = [];
-
-        if ($user->type === 'job_hunter' || $user->type === 'employer') {
+        //TODO handle listings vs applications and how they are rendered
+        if ($user->type === 'employer') {
             $props['listings'] = Listing::where('user_id', $user->id)
                 ->with(['skills', 'categories'])
                 ->latest()
                 ->paginate(10);
         } else {
-            $props['applications'] = Application::where('user_id', $user->id)
-                ->with('listing')
+            $props['listings'] = ListingApplication::where('user_id', $user->id)
+                ->with(['listing:id,title,description,salary'])
                 ->latest()
                 ->paginate(10);
         }
