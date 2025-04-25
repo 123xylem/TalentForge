@@ -47,17 +47,17 @@ class HandleInertiaRequests extends Middleware
             'error' => $flashData['error'] ?? null,
         ];
 
-        // // Have to keep flash data for next request if it exists or profile update wont work
-        // if ($flash['success'] || $flash['errors']) {
-        //     $request->session()->reflash();
-        // }
-
         //Share session data to inertia
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? [
+                    // User data
+                    ...($request->user()->toArray()),
+                    'notifications' => $request->user()->notifications()->latest()->take(5)->get(),
+                    'unread_notifications_count' => $request->user()->unreadNotifications()->count(),
+                ] : null,
             ],
             'ziggy' => [
                 ...(new Ziggy)->toArray(),

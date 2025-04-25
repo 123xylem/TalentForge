@@ -71,7 +71,7 @@ class ProfileUpdateRequest extends FormRequest
     }
     protected function validateFile($value, $attribute, $fail)
     {
-        $rules = ['file', 'mimes:jpg,png,pdf,jpeg,webp', 'max:4048'];
+        $rules = ['file', 'mimes:jpg,png,pdf,jpeg,webp,doc,docx,odt', 'max:4048'];
         $validator = \Validator::make([$attribute => $value], [$attribute => $rules]);
 
         if ($validator->fails()) {

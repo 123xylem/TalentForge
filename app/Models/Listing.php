@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-//model responsible for data structure of model.
-// affects how data is stored in database.
+use App\Models\ListingApplication;
+use App\Models\User;
 
 
 // the controller interacts with this by using the model to query the database.
@@ -37,5 +37,22 @@ class Listing extends Model
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'listing_category');
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(ListingApplication::class);
+    }
+
+    public function applicants()
+    {
+        return $this->hasManyThrough(
+            User::class,
+            ListingApplication::class,
+            'listing_id',  // Foreign key on listing_applications table
+            'id',          // Foreign key on users table
+            'id',          // Local key on listings table
+            'user_id'      // Local key on listing_applications table
+        )->select('users.*');  // Explicitly select user fields
     }
 }

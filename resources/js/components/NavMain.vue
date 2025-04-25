@@ -8,17 +8,16 @@ defineProps<{
 }>();
 
 const page = usePage<SharedData>();
+const userType = page.props.auth.user.type === 'employer' ? 'Employer' : 'Job Seeker';
+const userName = page.props.auth.user.name;
 </script>
 
 <template>
     <SidebarGroup class="px-2 py-0">
-        <SidebarGroupLabel>Platform</SidebarGroupLabel>
+        <SidebarGroupLabel>Hi {{ userName }} - {{ userType }}</SidebarGroupLabel>
         <SidebarMenu>
             <SidebarMenuItem v-for="item in items" :key="item.title">
-                <SidebarMenuButton 
-                    as-child :is-active="item.href === page.url"
-                    :tooltip="item.title"
-                >
+                <SidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title">
                     <Link :href="item.href">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>

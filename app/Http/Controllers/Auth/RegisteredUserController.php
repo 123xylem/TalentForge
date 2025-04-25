@@ -38,7 +38,7 @@ class RegisteredUserController extends Controller
             'website' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
             'profile_image' => 'nullable|file|mimes:jpg,png,pdf,jpeg,webp|max:2048',
-            'cv' => 'nullable|file|mimes:jpg,png,pdf,doc,docx|max:2048',
+            'cv' => 'nullable|file|mimes:jpg,png,pdf,doc,docx,odt|max:2048',
             'phone' => 'nullable|string|max:255',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'company' => 'nullable|string|max:255',

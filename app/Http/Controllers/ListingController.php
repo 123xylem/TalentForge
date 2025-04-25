@@ -9,7 +9,10 @@ use Inertia\Inertia;
 use App\Models\Category;
 use App\Models\Skill;
 use App\Http\Requests\ListingRequest;
+use App\Models\ListingApplication;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ListingController extends Controller
 {
@@ -47,7 +50,8 @@ class ListingController extends Controller
 
         return redirect()
             ->route('listings.show', $listing->id)
-            ->with('flash', ['success' => 'Listing created successfully!']);
+            ->with('flash.success', 'Listing created successfully!')
+            ->with('userApplicationStatus', 'applied');
     }
 
     /**
@@ -55,14 +59,41 @@ class ListingController extends Controller
      */
     public function show(Listing $listing)
     {
+        $isOwner = $listing->user_id === Auth::id();
+        if (!$isOwner) {
+            $userApplicationStatus = $listing->applications->where('user_id', Auth::id())->first()->status ?? null;
+        }
+        if ($isOwner) {
+            $listingApplications = $listing->applications;
+            $listingApplicationsData = [];
+            foreach ($listingApplications as $listingApplication) {
+                $applicant = $listingApplication->applicant;
+                $name = $applicant->name;
+                $email = $applicant->email;
+                $phone = $applicant->phone;
+                $address = $applicant->location;
+                $listingApplicationsData[] = [
+                    'id' => $listingApplication->id,
+                    'cv' => Storage::url($listingApplication->cv),
+                    'cover_letter' => $listingApplication->cover_letter,
+                    'status' => $listingApplication->status,
+                    'created_at' => $listingApplication->created_at,
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'address' => $address,
+                ];
+            }
+        }
         return Inertia::render('Listings/Show', [
             'listing' => $listing,
-            'isOwner' => $listing->user_id === Auth::id(),
+            'userApplicationStatus' => $userApplicationStatus ?? null,
+            'isOwner' => $isOwner,
+            'listingApplications' => $listingApplicationsData ?? [],
             'skills' => $listing->skills,
             'categories' => $listing->categories,
         ]);
     }
-
     /**
      * Show the form for editing the specified resource.
      */

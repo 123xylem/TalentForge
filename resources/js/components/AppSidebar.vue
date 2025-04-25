@@ -4,8 +4,8 @@ import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { BookOpen, LayoutGrid, User } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { LayoutGrid, User } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -15,17 +15,13 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
 ];
+const user = usePage().props.user;
 
 const footerNavItems: NavItem[] = [
     {
         title: 'Edit Profile',
         href: route('profile.edit'),
         icon: User,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
     },
 ];
 </script>
@@ -43,11 +39,9 @@ const footerNavItems: NavItem[] = [
                 </SidebarMenuItem>
             </SidebarMenu>
         </SidebarHeader>
-
         <SidebarContent>
             <NavMain :items="mainNavItems" />
         </SidebarContent>
-
         <SidebarFooter>
             <NavFooter :items="footerNavItems" />
             <NavUser />
