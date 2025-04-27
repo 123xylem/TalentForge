@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use App\Notifications\ListingApplicationUpdate;
-use App\Mail\ListingApplicationUpdated;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 class ListingApplicationController extends Controller
@@ -102,6 +100,7 @@ class ListingApplicationController extends Controller
     {
         try {
             $recipient->notify(new ListingApplicationUpdate($listingApplication, $recipient, $employerAction));
+            //Notify now handles email and app notifications so we dont need a mailable class
             // Mail::to($recipient->email)->queue(new ListingApplicationUpdated($recipient, $listingApplication, $employerAction));
         } catch (\Exception $e) {
             \Log::error('Email failed: ' . $e->getMessage());

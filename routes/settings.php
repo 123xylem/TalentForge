@@ -21,5 +21,6 @@ Route::middleware(['web', 'auth'])->group(function () {
         return Inertia::render('settings/Appearance');
     })->name('appearance');
 
-    Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::patch('/notifications/{notification}', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::patch('/notifications', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 });
