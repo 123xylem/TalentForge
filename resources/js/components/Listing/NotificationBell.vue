@@ -67,8 +67,9 @@ const submitAll = () => {
                     />
                 </form>
                 <div v-for="notification in unreadNotifications" :key="notification.id" class="px-4 py-2">
+                    {{ notification }}
                     <form class="flex items-center gap-2 text-gray-900 hover:cursor-pointer" @click="submit(notification.id)" method="POST">
-                        <div v-if="!notification.data.employerAction" class="text-sm text-gray-900">
+                        <div v-if="notification.data.employerAction" class="text-sm text-gray-900">
                             Your application for {{ notification.data.title }} at {{ notification.data.company }} has been
                             {{ notification.data.status }}
                         </div>

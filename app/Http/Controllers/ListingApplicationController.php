@@ -48,7 +48,6 @@ class ListingApplicationController extends Controller
                 $cvPath = $request->file('cv')->store('uploads', 'public');
             }
         }
-        dd($request, 'tings');
 
         $request->validate($rules);
         $listingApplication = new ListingApplication();
@@ -99,13 +98,14 @@ class ListingApplicationController extends Controller
         $action = $request->action === 'progress' ? 'shortlisted' : 'rejected';
         $listingApplication->status = $action;
         $applicant = $listingApplication->applicant;
-        //NOTIFY Applicant or employer
+        //NOTIFY Applicant 
 
+        $this->notifyApplicant($listingApplication, $applicant, $action);
         $listingApplication->save();
         return to_route('listing-applications.show', $listingApplication->id)->with('flash', ['success' => 'Application updated successfully!']);
     }
 
-    private function notifyApplicant(ListingApplication $listingApplication, User $recipient, string $employerAction = null): void
+    private function notifyApplicant(ListingApplication $listingApplication, User $recipient, ?string $employerAction = null): void
     {
         try {
             $recipient->notify(new ListingApplicationUpdate($listingApplication, $recipient, $employerAction));

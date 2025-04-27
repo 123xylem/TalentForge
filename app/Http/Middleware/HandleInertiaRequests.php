@@ -55,7 +55,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user() ? [
                     // User data
                     ...($request->user()->toArray()),
-                    'notifications' => $request->user()->notifications()->latest()->take(5)->get(),
+                    'notifications' => $request->user()->notifications()->latest()->take(10)->get(),
                     'unread_notifications_count' => $request->user()->unreadNotifications()->count(),
                 ] : null,
             ],
