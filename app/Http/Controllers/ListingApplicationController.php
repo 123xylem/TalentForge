@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use App\Notifications\ListingApplicationUpdate;
+use Illuminate\Support\Facades\Log;
 
 class ListingApplicationController extends Controller
 {
@@ -47,7 +48,9 @@ class ListingApplicationController extends Controller
         $listingApplication->cv = $cvPath;
         $listingApplication->cover_letter = $request->cover_letter;
         $listingApplication->status = 'applied';
+
         $listingApplication->save();
+        $this->notifyApplicant($listingApplication, $listingApplication->listing->owner, null);
         return to_route('listings.show', $request->listing_id)->with('flash', ['success' => 'Aplication Submitted successfully!']);
     }
 
@@ -87,12 +90,22 @@ class ListingApplicationController extends Controller
         $action = $request->action === 'progress' ? 'shortlisted' : 'rejected';
         $listingApplication->status = $action;
         $applicant = $listingApplication->applicant;
+        //NOTIFY Applicant or employer
 
-        $applicant->notify(new ListingApplicationUpdate($listingApplication, $applicant));
         $listingApplication->save();
         return to_route('listing-applications.show', $listingApplication->id)->with('flash', ['success' => 'Application updated successfully!']);
     }
 
+    private function notifyApplicant(ListingApplication $listingApplication, User $recipient, string $employerAction = null): void
+    {
+        try {
+            $recipient->notify(new ListingApplicationUpdate($listingApplication, $recipient, $employerAction));
+            //Notify now handles email and app notifications so we dont need a mailable class
+            // Mail::to($recipient->email)->queue(new ListingApplicationUpdated($recipient, $listingApplication, $employerAction));
+        } catch (\Exception $e) {
+            \Log::error('Email failed: ' . $e->getMessage());
+        }
+    }
     /**
      * Remove the specified resource from storage.
      */

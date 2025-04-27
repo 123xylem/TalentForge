@@ -83,7 +83,7 @@ const submit = () => {
         onSuccess: () => {
             closeModal();
             emit('update:is-open', false);
-            window.location.href = route('listings.show', props.listing_id);
+            // window.location.href = route('listings.show', props.listing_id);
         },
     });
 };

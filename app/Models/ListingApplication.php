@@ -19,10 +19,10 @@ class ListingApplication extends Model
     }
 
     //Get ID of owner of listing
-    public function owner()
-    {
-        return $this->belongsTo(Listing::class)->owner();
-    }
+    // public function owner()
+    // {
+    //     return $this->belongsTo(Listing::class)->owner();
+    // }
 
     //Get ID of all applicants
     public function applicant()

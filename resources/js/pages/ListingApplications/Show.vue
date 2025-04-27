@@ -45,7 +45,6 @@ const modalAction = ref('');
 const confirmModalOpen = (action: string) => {
     confirmModal.value = true;
     modalAction.value = action;
-    console.log(modalAction.value, 'modalAction', action);
 };
 
 const confirmModalClose = () => {
@@ -65,7 +64,6 @@ const submitForm = (action: string) => {
         progressForm.patch(route('listing-applications.update', listingApplication?.id), {
             onSuccess: () => {
                 window.location.href = route('listings.show', listingApplication?.listing?.id);
-                console.log('progressForm success');
             },
         });
     }
