@@ -27,6 +27,14 @@ class ListingApplicationController extends Controller
      */
     public function store(Request $request)
     {
+        $existing = ListingApplication::where('user_id', Auth::id())
+            ->where('listing_id', $request->listing_id)
+            ->first();
+        if ($existing) {
+            return to_route('listings.index')
+                ->with('flash', ['info' => 'You have already applied to this listing.']);
+        }
+
         $cvPath = $request->cv ? $request->cv : null;
         // Build validation rules
         $rules = [
@@ -40,6 +48,7 @@ class ListingApplicationController extends Controller
                 $cvPath = $request->file('cv')->store('uploads', 'public');
             }
         }
+        dd($request, 'tings');
 
         $request->validate($rules);
         $listingApplication = new ListingApplication();
