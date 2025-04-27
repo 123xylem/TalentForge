@@ -21,11 +21,12 @@ class ListingApplicationUpdate extends Notification
         //
         $this->listingApplication = $listingApplication;
         $this->user = $listingApplication->applicant;
-        $this->employerAction = $employerAction;
+        $this->employerAction = $employerAction ?? null;
 
-        if (!$employerAction) {
+        if (!$this->employerAction) {
             $this->user = $listingApplication->listing->owner;
         }
+        \Log::info([$this->employerAction, 'employer action!???']);
     }
 
     /**
@@ -69,6 +70,7 @@ class ListingApplicationUpdate extends Notification
             'status' => $this->listingApplication->status,
             'title' => $this->listingApplication->listing->title,
             'company' => $this->listingApplication->listing->company,
+            'employerAction' => $this->employerAction,
         ];
     }
 }
