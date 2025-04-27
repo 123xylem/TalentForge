@@ -16,11 +16,16 @@ class ListingApplicationUpdate extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(public ListingApplication $listingApplication, public User $user)
+    public function __construct(public ListingApplication $listingApplication, public User $user, public string | null $employerAction = null)
     {
         //
         $this->listingApplication = $listingApplication;
         $this->user = $listingApplication->applicant;
+        $this->employerAction = $employerAction;
+
+        if (!$employerAction) {
+            $this->user = $listingApplication->listing->owner;
+        }
     }
 
     /**
@@ -40,11 +45,14 @@ class ListingApplicationUpdate extends Notification
     {
         $status = $this->listingApplication->status;
         $listing = $this->listingApplication->listing;
+        $message =  $this->employerAction
+            ? "Your application for {$listing->title} at {$listing->company} has been {$status}."
+            : "New Application for " . $listing->title . " at " . $listing->company;
 
         return (new MailMessage)
             ->subject("Application Status Update: {$listing->title}")
             ->greeting("Hi {$this->user->name},")
-            ->line("Your application for {$listing->title} at {$listing->company} has been {$status}.")
+            ->line($message)
             ->action('View Application', route('listing-applications.show', $this->listingApplication->id))
             ->line('Thank you for using TalentForge!');
     }

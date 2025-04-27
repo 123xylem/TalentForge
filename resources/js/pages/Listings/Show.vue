@@ -9,13 +9,17 @@ import { FileText } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const { truncate } = useTextFormatter();
-
 const page = usePage<SharedData>();
 const { listing, isOwner, auth, userApplicationStatus = null, listingApplications = [] } = page.props;
 const user = auth.user;
 const showApplications = isOwner && listingApplications?.length > 0;
+const status = ref(userApplicationStatus);
+//TODO: only 1 application per user_id/listing_id
 console.log('here', listingApplications, userApplicationStatus);
 // const userApplied = !user.status.includes('read', 'unread');
+const nullfiyUserApplicationStatus = () => {
+    status.value = null;
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -74,7 +78,8 @@ const isModalOpen = ref(false);
                     <div class="transform rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md">
                         <h1 class="text-2xl font-semibold text-gray-900">
                             {{ listing?.title }}
-                            <span v-if="!isOwner && user.type === 'job_hunter' && !userApplicationStatus" class="">
+                            <button v-if="!isOwner && user.type === 'job_hunter' && status" @click="nullfiyUserApplicationStatus">Unapply!</button>
+                            <span v-if="!isOwner && user.type === 'job_hunter' && !status" class="">
                                 <button
                                     @click="toggleModal"
                                     class="rounded-full bg-blue-500 px-2 py-1 text-sm text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
@@ -145,7 +150,7 @@ const isModalOpen = ref(false);
                                     </h3>
                                     <StatusLabel v-if="application.status" :status="application.status" />
                                 </div>
-                                <span class="text-sm text-gray-500"> Applied {{ new Date(application.created_at).toLocaleDateString() }} </span>
+                                <span class="text-sm text-gray-500"> Applied {{ new Date(application.created_at).toLocaleString() }} </span>
                             </div>
 
                             <!-- Grid Layout for Details -->
