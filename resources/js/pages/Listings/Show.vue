@@ -78,7 +78,6 @@ const isModalOpen = ref(false);
                     <div class="transform rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md">
                         <h1 class="text-2xl font-semibold text-gray-900">
                             {{ listing?.title }}
-                            <button v-if="!isOwner && user.type === 'job_hunter' && status" @click="nullfiyUserApplicationStatus">Unapply!</button>
                             <span v-if="!isOwner && user.type === 'job_hunter' && !status" class="">
                                 <button
                                     @click="toggleModal"

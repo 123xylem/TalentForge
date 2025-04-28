@@ -58,8 +58,8 @@ const submitAll = () => {
         </button>
         <!-- Dropdown -->
         <div v-if="unreadNotifications?.length && showNotifications" class="absolute right-0 z-50 mt-2 w-80 rounded-md bg-white shadow-lg">
-            <div class="px-4 py-2">
-                <form @submit.prevent="submitAll" method="POST" class="ml-auto w-fit">
+            <div class="py-1">
+                <form @submit.prevent="submitAll" method="POST" class="absolute right-2 top-2 w-fit">
                     <input
                         type="submit"
                         class="ml-auto rounded-full bg-red-500 px-2 py-1 text-xs text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
@@ -67,15 +67,19 @@ const submitAll = () => {
                     />
                 </form>
                 <div v-for="notification in unreadNotifications" :key="notification.id" class="px-4 py-2">
-                    <form class="flex items-center gap-2 text-gray-900 hover:cursor-pointer" @click="submitOne(notification.id)" method="POST">
+                    <form class="flex flex-wrap items-center gap-2 text-gray-900 hover:cursor-pointer" method="POST">
                         <div v-if="notification.data.employerAction" class="text-sm text-gray-900">
-                            Your application for {{ notification.data.title }} at {{ notification.data.company }} has been
-                            {{ notification.data.status }}
+                            <a :href="notification.data.url">
+                                Your application for {{ notification.data.title }} at {{ notification.data.company }} has been
+                                {{ notification.data.status }}
+                            </a>
                         </div>
                         <div v-else class="text-sm text-gray-900">
-                            You have a new application for {{ notification.data.title }} at {{ notification.data.company }}
+                            <a :href="notification.data.url">
+                                You have a new application for {{ notification.data.title }} at {{ notification.data.company }}
+                            </a>
                         </div>
-                        <div class="text-xs text-gray-500">
+                        <div class="w-full text-xs text-gray-500">
                             {{ new Date(notification.created_at).toLocaleString() }}
                         </div>
                         <input
