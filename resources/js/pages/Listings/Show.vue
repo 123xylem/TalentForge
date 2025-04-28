@@ -14,7 +14,6 @@ const { listing, isOwner, auth, userApplicationStatus = null, listingApplication
 const user = auth.user;
 const showApplications = isOwner && listingApplications?.length > 0;
 const status = ref(userApplicationStatus);
-//TODO: only 1 application per user_id/listing_id
 console.log('here', listingApplications, userApplicationStatus);
 // const userApplied = !user.status.includes('read', 'unread');
 const nullfiyUserApplicationStatus = () => {
