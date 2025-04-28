@@ -14,7 +14,6 @@ const { listing, isOwner, auth, userApplicationStatus = null, listingApplication
 const user = auth.user;
 const showApplications = isOwner && listingApplications?.length > 0;
 const status = ref(userApplicationStatus);
-//TODO: only 1 application per user_id/listing_id
 console.log('here', listingApplications, userApplicationStatus);
 // const userApplied = !user.status.includes('read', 'unread');
 const nullfiyUserApplicationStatus = () => {
@@ -78,7 +77,6 @@ const isModalOpen = ref(false);
                     <div class="transform rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md">
                         <h1 class="text-2xl font-semibold text-gray-900">
                             {{ listing?.title }}
-                            <button v-if="!isOwner && user.type === 'job_hunter' && status" @click="nullfiyUserApplicationStatus">Unapply!</button>
                             <span v-if="!isOwner && user.type === 'job_hunter' && !status" class="">
                                 <button
                                     @click="toggleModal"

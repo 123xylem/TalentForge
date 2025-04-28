@@ -10,9 +10,12 @@ use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use App\Notifications\ListingApplicationUpdate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 class ListingApplicationController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
@@ -27,6 +30,7 @@ class ListingApplicationController extends Controller
      */
     public function store(Request $request)
     {
+
         $existing = ListingApplication::where('user_id', Auth::id())
             ->where('listing_id', $request->listing_id)
             ->first();
@@ -59,7 +63,7 @@ class ListingApplicationController extends Controller
 
         $listingApplication->save();
         $this->notifyApplicant($listingApplication, $listingApplication->listing->owner, null);
-        return to_route('listings.show', $request->listing_id)->with('flash', ['success' => 'Aplication Submitted successfully!']);
+        return to_route('listings.show', $request->listing_id);
     }
 
     /**
@@ -67,6 +71,7 @@ class ListingApplicationController extends Controller
      */
     public function show(ListingApplication $listingApplication)
     {
+        $this->authorize('view', $listingApplication);
         $applicant = $listingApplication->applicant;
         $skills = $applicant->skills;
         $applicant['skills'] = $skills;
@@ -83,6 +88,7 @@ class ListingApplicationController extends Controller
      */
     public function edit(ListingApplication $listingApplication)
     {
+        $this->authorize('view', $listingApplication);
 
         return Inertia::render('ListingApplications/Edit', [
             'listingApplication' => $listingApplication,
@@ -94,7 +100,7 @@ class ListingApplicationController extends Controller
      */
     public function update(Request $request, ListingApplication $listingApplication)
     {
-        //  
+        $this->authorize('view', $listingApplication);
         $action = $request->action === 'progress' ? 'shortlisted' : 'rejected';
         $listingApplication->status = $action;
         $applicant = $listingApplication->applicant;
@@ -120,6 +126,8 @@ class ListingApplicationController extends Controller
      */
     public function destroy(ListingApplication $listingApplication)
     {
-        //
+        $this->authorize('view', $listingApplication);
+        $listingApplication->delete();
+        return to_route('listings.index')->with('flash', ['success' => 'Application deleted successfully!']);
     }
 }

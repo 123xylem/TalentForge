@@ -12,7 +12,7 @@ use App\Models\User;
 class ListingApplicationUpdate extends Notification
 {
     use Queueable;
-
+    public $url;
     /**
      * Create a new notification instance.
      */
@@ -22,9 +22,11 @@ class ListingApplicationUpdate extends Notification
         $this->listingApplication = $listingApplication;
         $this->user = $listingApplication->applicant;
         $this->employerAction = $employerAction ?? null;
+        $this->url = route('listings.show', $this->listingApplication->listing_id);
 
         if (!$this->employerAction) {
             $this->user = $listingApplication->listing->owner;
+            $this->url = route('listing-applications.show', $this->listingApplication->id);
         }
         \Log::info([$this->employerAction, 'employer action!???']);
     }
@@ -71,6 +73,8 @@ class ListingApplicationUpdate extends Notification
             'title' => $this->listingApplication->listing->title,
             'company' => $this->listingApplication->listing->company,
             'employerAction' => $this->employerAction,
+            'id' => $this->listingApplication->id,
+            'url' => $this->url,
         ];
     }
 }
