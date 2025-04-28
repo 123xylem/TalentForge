@@ -57,7 +57,6 @@ const submitForm = (action: string) => {
         rejectForm.patch(route('listing-applications.update', listingApplication?.id), {
             onSuccess: () => {
                 window.location.href = route('listings.show', listingApplication?.listing?.id);
-                console.log('rejectForm success');
             },
         });
     } else {

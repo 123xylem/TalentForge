@@ -118,3 +118,19 @@ export interface Category {
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
+
+export interface NotificationsLinks {
+    url: string | null;
+    label?: string;
+    active?: boolean;
+}
+
+export interface Notification {
+    id: string;
+    type: string;
+    read_at: string | null;
+    created_at: string;
+    updated_at: string;
+    notifiable_id: number;
+    data: NotificationData;
+}
