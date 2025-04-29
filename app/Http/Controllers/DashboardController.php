@@ -18,6 +18,7 @@ class DashboardController extends Controller
      */
     public function index(): Response
     {
+        $page = request()->input('page', 1);
         $user = Auth::user();
         $props = [];
         //TODO handle listings vs applications and how they are rendered

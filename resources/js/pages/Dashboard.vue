@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ListingBlock from '@/components/Listing/ListingBlock.vue';
+import Pagination from '@/components/Pagination.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
@@ -27,6 +28,8 @@ const breadcrumbs: BreadcrumbItem[] = [
         <div v-else class="flex flex-col gap-4 rounded-xl p-4">
             <h1 class="text-2xl font-semibold">No listings found</h1>
         </div>
+        <Pagination v-if="listings" :links="listings.links" />
+
         <div class="listings-buttons flex gap-4">
             <Link v-if="isEmployer" :href="route('listings.create')" class="btn btn-primary">Create Listing</Link>
             <Link :href="route('listings.index')" class="btn btn-secondary">All listings</Link>
