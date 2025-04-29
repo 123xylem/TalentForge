@@ -61,7 +61,7 @@ const toggleModal = () => {
         openModal();
     }
 };
-
+console.log(listing.location, 'listing');
 const isModalOpen = ref(false);
 </script>
 

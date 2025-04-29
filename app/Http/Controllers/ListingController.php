@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use App\Filters\ListingFilter;
 
 
 class ListingController extends Controller
@@ -21,13 +22,11 @@ class ListingController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request, ListingFilter $filters)
     {
-
-        $filters = request()->input('filters', []);
-        dd($filters);
-        if (count($filters) > 0) {
-            $listings = Listing::filter($filters)->get();
+        $filterParams = count($request->all()) > 0;
+        if ($filterParams) {
+            $listings = Listing::filter($filters)->paginate(6);
         } else {
             $page = request()->input('page', 1);
             $cacheKey = 'listings_page_' . $page;
@@ -101,9 +100,11 @@ class ListingController extends Controller
                 ];
             }
         }
-        Cache::put('listing' . $listing->id, $listing);
+        $listingData = Cache::remember('listing' . $listing->id, 60 * 120, function () use ($listing) {
+            return $listing;
+        });
         return Inertia::render('Listings/Show', [
-            'listing' => Cache::get('listing' . $listing->id),
+            'listing' => $listingData,
             'userApplicationStatus' => $userApplicationStatus ?? null,
             'isOwner' => $isOwner,
             'listingApplications' => $listingApplicationsData ?? [],
