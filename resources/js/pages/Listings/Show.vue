@@ -37,13 +37,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 //     }
 // };
 
-//TODO: Filter listings BY:
-// - Category
-// - Skills
-// - Salary
-// - Location
-// - Application Status
-
 const modalRef = ref<InstanceType<typeof ListingApplicationModal> | null>(null);
 
 const openModal = () => {

@@ -34,8 +34,10 @@ class ListingController extends Controller
                 return Listing::with('skills', 'categories')->paginate(6);
             });
         }
+        //TODO; should filters be passed to the view?
         return Inertia::render('Listings/Index', [
             'paginatedListingData' => $listings,
+            // 'filters' => $filters,
         ]);
     }
 

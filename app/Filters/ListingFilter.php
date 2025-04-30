@@ -13,7 +13,9 @@ class ListingFilter extends QueryFilter
 
     public function category($value)
     {
-        return $this->builder->where('category_id', $value);
+        return $this->builder->whereHas('categories', function ($query) use ($value) {
+            $query->where('category_id', $value);
+        });
     }
 
     public function skills($value)

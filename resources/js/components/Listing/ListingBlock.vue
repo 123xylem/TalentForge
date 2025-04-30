@@ -7,8 +7,6 @@ const props = defineProps<{
     listings: PaginatedListingData;
     rows: number;
 }>();
-
-console.log(props.listings.data);
 </script>
 <template>
     <div class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-{{ props.rows }}">

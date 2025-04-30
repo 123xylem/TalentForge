@@ -13,10 +13,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Cache::remember('categories', 60 * 250, function () {
-            return Category::all(['id', 'name']);
+        $parentCategories = Cache::remember('categories', 60 * 250, function () {
+            return Category::whereNull('parent_id')->get(['id', 'name']);
         });
-        return response()->json($categories);
+        return response()->json($parentCategories);
     }
 
     /**
