@@ -13,16 +13,31 @@ use App\Models\ListingApplication;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use App\Filters\ListingFilter;
+
 
 class ListingController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request, ListingFilter $filters)
     {
+        $filterParams = count($request->all()) > 0;
+        if ($filterParams) {
+            $listings = Listing::filter($filters)->paginate(6);
+        } else {
+            $page = request()->input('page', 1);
+            $cacheKey = 'listings_page_' . $page;
+            $listings = Cache::remember($cacheKey, 60 * 120, function () {
+                return Listing::with('skills', 'categories')->paginate(6);
+            });
+        }
+        //TODO; should filters be passed to the view?
         return Inertia::render('Listings/Index', [
-            'paginatedListingData' => Listing::with('skills', 'categories')->paginate(6),
+            'paginatedListingData' => $listings,
+            // 'filters' => $filters,
         ]);
     }
 
@@ -47,6 +62,8 @@ class ListingController extends Controller
         $listing->skills()->attach($request->skills);
         $listing->categories()->attach($request->categories);
         $listing->save();
+        Cache::forget('listings');
+        Cache::put('listings', Listing::with('skills', 'categories'));
 
         return redirect()
             ->route('listings.show', $listing->id)
@@ -85,8 +102,11 @@ class ListingController extends Controller
                 ];
             }
         }
+        $listingData = Cache::remember('listing' . $listing->id, 60 * 120, function () use ($listing) {
+            return $listing;
+        });
         return Inertia::render('Listings/Show', [
-            'listing' => $listing,
+            'listing' => $listingData,
             'userApplicationStatus' => $userApplicationStatus ?? null,
             'isOwner' => $isOwner,
             'listingApplications' => $listingApplicationsData ?? [],
@@ -116,7 +136,8 @@ class ListingController extends Controller
         $listing->update($request->all());
         $listing->skills()->sync($request->skills);
         $listing->categories()->sync($request->categories);
-
+        Cache::forget('listing' . $listing->id);
+        Cache::put('listing' . $listing->id, $listing);
         return redirect()
             ->route('listings.show', $listing->id)
             ->with('flash', ['success' => 'Listing updated successfully!']);
@@ -137,7 +158,9 @@ class ListingController extends Controller
         $listing->categories()->detach();
 
         $listing->delete();
-
+        Cache::forget('listing' . $listing->id);
+        Cache::forget('listings');
+        Cache::put('listings', Listing::with('skills', 'categories'));
         return redirect()
             ->route('listings.index')
             ->with('flash', ['success' => 'Listing deleted successfully!']);

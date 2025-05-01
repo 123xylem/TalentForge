@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
@@ -12,7 +13,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        $parentCategories = Cache::remember('categories', 60 * 250, function () {
+            return Category::whereNull('parent_id')->get(['id', 'name']);
+        });
+        return response()->json($parentCategories);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Skill;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class SkillController extends Controller
 {
@@ -12,7 +13,10 @@ class SkillController extends Controller
      */
     public function index()
     {
-        //
+        $skills = Cache::remember('skills', 60 * 120, function () {
+            return Skill::all(['id', 'name']);
+        });
+        return response()->json($skills);
     }
 
     /**
