@@ -18,15 +18,15 @@ class ListingApplication extends Model
         return $this->belongsTo(Listing::class);
     }
 
-    //Get ID of owner of listing
-    // public function owner()
-    // {
-    //     return $this->belongsTo(Listing::class)->owner();
-    // }
 
     //Get ID of all applicants
     public function applicant()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function scopeFilter($query, $filters)
+    {
+        return $filters->apply($query);
     }
 }

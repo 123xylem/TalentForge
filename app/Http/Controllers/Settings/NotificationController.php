@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 use Illuminate\Notifications\DatabaseNotification;
-
+//TODO add Caching to notifications
 class NotificationController extends Controller
 {
     public function index(Request $request)

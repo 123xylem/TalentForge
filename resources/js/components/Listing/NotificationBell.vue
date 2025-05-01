@@ -8,8 +8,6 @@ const showNotifications = ref(false);
 
 // Get notifications from auth user
 notifications.value = usePage().props.auth.user.notifications.data;
-
-console.log(notifications.value, 'notifications');
 // Use computed instead of watch
 const unreadNotifications = computed(() => notifications.value.filter((notification) => notification.read_at === null)) ?? {};
 

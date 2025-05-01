@@ -3,11 +3,13 @@ import StatusLabel from '@/components/StatusLabel.vue';
 import { useTextFormatter } from '@/composables/useTextFormatter';
 import { type Listing, type ListingApplication } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
+import { UserRoundIcon } from 'lucide-vue-next';
 import { computed, defineProps } from 'vue';
 const { truncate } = useTextFormatter();
 
 const props = defineProps<{
     listing: ListingApplication | Listing;
+    applicants: number;
 }>();
 
 const page = usePage();
@@ -20,6 +22,10 @@ const listingData = computed(() => (props.listing.listing?.id ? props.listing.li
 <template>
     <div class="relative flex h-full flex-1 flex-col gap-2 rounded-lg border p-4 hover:cursor-pointer hover:bg-gray-900">
         <Link :href="route('listings.show', listingData.id)" class="block">
+            <div v-if="applicants > 0" class="absolute right-4 top-4 flex flex-row gap-2">
+                <UserRoundIcon class="h-4 w-4 text-neutral-500" />
+                <span class="text-xs text-neutral-500"> {{ applicants }} </span>
+            </div>
             <h2 class="text-lg font-semibold">
                 {{ listingData.title }}
             </h2>

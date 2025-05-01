@@ -55,4 +55,9 @@ class Listing extends Model
             'user_id'      // Local key on listing_applications table
         )->select('users.*');  // Explicitly select user fields
     }
+
+    public function scopeFilter($query, $filters)
+    {
+        return $filters->apply($query);
+    }
 }
