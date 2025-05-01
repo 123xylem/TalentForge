@@ -2,8 +2,14 @@
 import { type Category, type Skill } from '@/types';
 import { defineEmits, defineProps, onMounted, ref } from 'vue';
 
+// Summary FilterBar is used by parent to provide a query builder for filtering items
+// Parent provides it with filter Props
+// FilterBar can edit props via  EMIT events
+// We can pass these filters from parent to pagination component so that it to can use the url params to filter the items
+
 defineProps<{
     title: string;
+    applicationFilter?: boolean;
     filters: {
         textSearch: string;
         locationSearch: string;
@@ -15,6 +21,7 @@ defineProps<{
 }>();
 
 //TODO: Finalise styles
+// TODO: Salary type filter needs work
 const skillsList = ref<Skill[]>([]);
 const categoriesList = ref<Category[]>([]);
 
@@ -34,8 +41,22 @@ const openDropdowns = ref({
 });
 
 const dropdownsOpen = ref(true);
-const salaryOptions = ['19,000', '29,000', '39,000', '49,000', '59,000', '69,000', '79,000', '89,000', '99,000', '109,000', '119,000', '149,000'];
-const applicationStatusOptions = ['Applied', 'Rejected', 'Shortlisted'];
+const salaryOptions = [
+    'Any',
+    '19,000',
+    '29,000',
+    '39,000',
+    '49,000',
+    '59,000',
+    '69,000',
+    '79,000',
+    '89,000',
+    '99,000',
+    '109,000',
+    '119,000',
+    '149,000',
+];
+const applicationStatusOptions = ['Any', 'Applied', 'Rejected', 'Shortlisted'];
 
 const getSkills = () => {
     if (skillsList.value.length === 0) {
@@ -106,7 +127,7 @@ const updateCategory = (categoryId: string) => {
 };
 
 const updateSalary = (salary: string) => {
-    if (formSelectedSalary.value === salary) {
+    if (salary === 'Any') {
         formSelectedSalary.value = '';
     } else {
         formSelectedSalary.value = salary;
@@ -124,7 +145,7 @@ const resetFilters = () => {
     formSelectedSalary.value = '';
     formLocationSearch.value = '';
     formTextSearch.value = '';
-    emits('resetForm');
+    emits('resetFilters');
 };
 
 onMounted(() => {
@@ -169,24 +190,22 @@ onMounted(() => {
                     </button>
                     <div
                         v-if="openDropdowns.categories && dropdownsOpen"
-                        class="absolute z-10 mt-2 flex max-w-[350px] flex-row flex-wrap rounded-md bg-white p-2 shadow-lg"
+                        class="absolute z-10 mt-2 flex max-w-[300px] flex-row flex-wrap rounded-md bg-white p-2 shadow-lg"
                     >
-                        <div class="flex min-w-max flex-row flex-wrap gap-x-2 gap-y-1 py-1">
-                            <label
-                                v-for="category in categoriesList"
-                                :key="category.id"
-                                class="flex min-w-[100px] items-center px-3 py-1 hover:bg-gray-100"
-                            >
-                                <input
-                                    type="radio"
-                                    :value="category.id"
-                                    class="mr-2"
-                                    :checked="formSelectedCategory === category.id"
-                                    @change="(updateCategory(category.id), $emit('update:category', category.id))"
-                                />
-                                <span class="text-sm text-gray-800">{{ category.name }}</span>
-                            </label>
-                        </div>
+                        <label
+                            v-for="category in categoriesList"
+                            :key="category.id"
+                            class="flex min-w-[120px] items-center px-3 py-1 hover:bg-gray-100"
+                        >
+                            <input
+                                type="radio"
+                                :value="category.id"
+                                class="mr-2"
+                                :checked="formSelectedCategory === category.id"
+                                @change="(updateCategory(category.id), $emit('update:category', category.id))"
+                            />
+                            <span class="text-sm text-gray-800">{{ category.name }}</span>
+                        </label>
                     </div>
                 </div>
                 <!-- Skills Dropdown -->
@@ -200,9 +219,9 @@ onMounted(() => {
                     </button>
                     <div
                         v-if="openDropdowns.skills && dropdownsOpen"
-                        class="absolute left-[-150px] z-10 mt-2 flex max-w-[300px] flex-row flex-wrap rounded-md bg-white p-2 shadow-lg"
+                        class="absolute left-[-150px] z-10 mt-2 grid w-[450px] grid-cols-3 gap-2 rounded-md bg-white p-2 shadow-lg"
                     >
-                        <label v-for="skill in skillsList" :key="skill.id" class="flex min-w-[120px] items-center px-3 py-1 hover:bg-gray-100">
+                        <label v-for="skill in skillsList" :key="skill.id" class="flex items-center px-3 py-1 hover:bg-gray-100">
                             <input
                                 type="checkbox"
                                 :value="skill.id"
@@ -232,11 +251,13 @@ onMounted(() => {
                                 <input
                                     type="radio"
                                     :id="salary"
-                                    @change="(updateSalary(salary), $emit('update:salary', salary))"
+                                    @change="(updateSalary(salary), $emit('update:salary', salary === 'Any' ? '' : salary))"
                                     :value="salary"
                                     :checked="salary === formSelectedSalary"
                                 />
-                                <span class="ml-2 text-sm text-gray-800">£{{ salary }} +</span>
+                                <span class="ml-2 text-sm text-gray-800">
+                                    {{ salary == 'Any' ? 'Any' : '£' + salary + ' +' }}
+                                </span>
                             </label>
                         </div>
                     </div>
@@ -265,13 +286,17 @@ onMounted(() => {
                                     :id="status"
                                     :value="status"
                                     :checked="status === formSelectedApplicationStatus"
-                                    @change="(updateApplicationStatus(status), $emit('update:applicationStatus', status))"
+                                    @change="
+                                        (updateApplicationStatus(status),
+                                        $emit('update:applicationStatus', status === 'Any' ? '' : status.toLowerCase()))
+                                    "
                                 />
-                                <span class="text-sm text-gray-800">{{ status }}</span>
+                                <span class="ml-2 text-sm text-gray-800">{{ status }}</span>
                             </label>
                         </div>
                     </div>
                 </div>
+
                 <button type="submit" class="rounded-full bg-blue-600 px-4 py-1 text-sm font-medium text-white hover:bg-blue-700">Search</button>
                 <button
                     type="button"

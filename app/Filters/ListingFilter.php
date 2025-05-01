@@ -43,4 +43,11 @@ class ListingFilter extends QueryFilter
                 ->orWhere('description', 'LIKE', '%' . $value . '%');
         });
     }
+
+    public function applicationStatus($value)
+    {
+        return $this->builder->whereHas('applicants', function ($query) use ($value) {
+            $query->where('status', $value);
+        });
+    }
 }

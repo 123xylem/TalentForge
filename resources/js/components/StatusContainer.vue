@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { SharedData } from '@/types';
 import { usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 const isVisible = ref(true);
-const { props } = usePage<SharedData>();
-const flash = props.flash;
-console.log(flash, 'flash');
+const page = usePage<SharedData>();
+
+const flash = computed(() => page.props.flash);
 const clearMessage = () => {
     isVisible.value = false;
 };

@@ -11,7 +11,7 @@ const props = defineProps<{
 <template>
     <div class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-{{ props.rows }}">
         <div v-for="listing in props.listings.data" :key="listing.id" class="w-full">
-            <ListingCard :listing="listing" />
+            <ListingCard :listing="listing" :applicants="listing.applicants_count || 0" />
         </div>
     </div>
 </template>
