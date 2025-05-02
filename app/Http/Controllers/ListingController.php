@@ -31,7 +31,7 @@ class ListingController extends Controller
             $page = request()->input('page', 1);
             $cacheKey = 'listings_page_' . $page;
             $listings = Cache::remember($cacheKey, 60 * 120, function () {
-                return Listing::where('listingClosed', false)->with('skills', 'categories')->paginate(6);
+                return Listing::where('listingClosed', false)->with('skills', 'categories')->paginate(6)->toArray();
             });
         }
         //TODO; should filters be passed to the view?
@@ -62,7 +62,9 @@ class ListingController extends Controller
         $listing->categories()->attach($request->categories);
         $listing->save();
         Cache::forget('listings');
-        Cache::put('listings', Listing::with('skills', 'categories'));
+        //Bear in mind caching Model with associations means data stored in db is arary and not elowquent object
+        // So you cant use it for queries just for sending to frontend display
+        Cache::put('listings', Listing::with('skills', 'categories')->get()->toArray());
 
         return redirect()
             ->route('listings.show', $listing->id)
