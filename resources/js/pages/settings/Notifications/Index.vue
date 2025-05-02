@@ -122,7 +122,12 @@ const isEmployer = computed(() => {
                                                     class="h-2 w-2 flex-shrink-0 rounded-full"
                                                     :class="notification.read_at ? 'bg-gray-400' : 'bg-blue-500'"
                                                 ></div>
-                                                <div v-if="!isEmployer" class="flex flex-wrap text-sm text-gray-900">
+                                                <div v-if="notification.data.message" class="flex flex-wrap text-sm text-gray-900">
+                                                    <a :href="notification.data.url">
+                                                        {{ notification.data.message }}
+                                                    </a>
+                                                </div>
+                                                <div v-else-if="!isEmployer" class="flex flex-wrap text-sm text-gray-900">
                                                     <a :href="notification.data.url">
                                                         Your application for {{ notification.data.title }} at {{ notification.data.company }} has been
                                                         {{ notification.data.status }}

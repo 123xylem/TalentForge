@@ -1,24 +1,19 @@
 <script setup lang="ts">
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import ListingApplicationModal from '@/components/Listing/ListingApplicationModal.vue';
 import StatusLabel from '@/components/StatusLabel.vue';
 import { useTextFormatter } from '@/composables/useTextFormatter';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { FileText } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const { truncate } = useTextFormatter();
 const page = usePage<SharedData>();
 const { listing, isOwner, auth, userApplicationStatus = null, listingApplications = [] } = page.props;
-const user = auth.user;
-const showApplications = isOwner && listingApplications?.length > 0;
-const status = ref(userApplicationStatus);
-console.log('here', listingApplications, userApplicationStatus);
-// const userApplied = !user.status.includes('read', 'unread');
-const nullfiyUserApplicationStatus = () => {
-    status.value = null;
-};
+
+console.log(listing, 'listingClosed!!!!', typeof listing?.listingClosed);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -30,6 +25,13 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: `/listings/${listing?.id}`,
     },
 ];
+
+const showConfirmationModal = ref(false);
+const isApplicationModalOpen = ref(false);
+const user = auth.user;
+const showApplications = isOwner && listingApplications?.length > 0;
+const status = ref(userApplicationStatus);
+
 //TODO: Delete listing
 // const deleteListing = () => {
 //     if (confirm('Are you sure you want to delete this listing?')) {
@@ -39,29 +41,54 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const modalRef = ref<InstanceType<typeof ListingApplicationModal> | null>(null);
 
-const openModal = () => {
-    modalRef.value?.openModal();
-};
-
-const closeModal = () => {
-    modalRef.value?.closeModal();
-};
-
-const toggleModal = () => {
-    if (isModalOpen.value) {
-        closeModal();
+const toggleApplicationModal = () => {
+    if (isApplicationModalOpen.value) {
+        modalRef.value?.closeModal();
     } else {
-        openModal();
+        modalRef.value?.openModal();
     }
 };
-console.log(listing.location, 'listing');
-const isModalOpen = ref(false);
+
+const toggleListingClosed = () => {
+    showConfirmationModal.value = true;
+};
+
+const form = useForm({
+    ...listing,
+    skills: [2, 3],
+});
+
+const updateListingStatus = () => {
+    showConfirmationModal.value = false;
+    console.log('PRE', form.listingClosed, form.skills, form.categories);
+    form.listingClosed = !listing?.listingClosed;
+    console.log('Post', form.listingClosed);
+
+    form.put(route('listings.update', listing?.id), {
+        preserveState: false,
+        onSuccess: (message) => {
+            console.log('success', listing?.listingClosed, message);
+        },
+        onError: (e) => {
+            console.log('error', e);
+        },
+    });
+};
 </script>
 
 <template>
     <Head title="Listing" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <ListingApplicationModal ref="modalRef" :listing_id="listing?.id" :user="user" v-model:is-open="isModalOpen" />
+        <ConfirmationModal
+            :title="listingClosed ? 'Reopen Listing' : 'Close Listing'"
+            :description="listingClosed ? 'Are you sure you want to reopen this listing?' : 'Are you sure you want to close this listing?'"
+            :confirmModal="showConfirmationModal"
+            :confirmModalText="listingClosed == true ? 'Reopen' : 'Close'"
+            @confirm="updateListingStatus"
+            @cancel="showConfirmationModal = false"
+        />
+
+        <ListingApplicationModal ref="modalRef" :listing_id="listing?.id" :user="user" v-model:is-open="isApplicationModalOpen" />
         <div class="grid h-full w-full justify-center gap-4 rounded-xl p-4" :class="!showApplications ? 'grid-cols-1' : 'grid-cols-2'">
             <!-- Job Listing Details -->
             <div class="flex flex-1 flex-col gap-4 rounded-lg p-2">
@@ -72,10 +99,10 @@ const isModalOpen = ref(false);
                             {{ listing?.title }}
                             <span v-if="!isOwner && user.type === 'job_hunter' && !status" class="">
                                 <button
-                                    @click="toggleModal"
+                                    @click="toggleApplicationModal"
                                     class="rounded-full bg-blue-500 px-2 py-1 text-sm text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
                                 >
-                                    {{ isModalOpen ? 'Cancel' : 'Apply' }}
+                                    {{ isApplicationModalOpen ? 'Cancel' : 'Apply' }}
                                 </button>
                             </span>
                             <StatusLabel v-if="userApplicationStatus" :status="userApplicationStatus" />
@@ -117,6 +144,13 @@ const isModalOpen = ref(false);
                                     class="rounded-full bg-red-500 px-2 py-1 text-sm text-neutral-500 text-white hover:cursor-pointer hover:bg-red-600"
                                 >
                                     Delete
+                                </button>
+                                <button
+                                    @click="toggleListingClosed"
+                                    class="rounded-full px-2 py-1 text-sm text-neutral-500 text-white hover:cursor-pointer hover:bg-red-600"
+                                    :class="listing?.listingClosed === true ? 'bg-green-500' : 'bg-red-500'"
+                                >
+                                    {{ listing?.listingClosed === true ? 'Reopen' : 'Close' }}
                                 </button>
                             </div>
                         </div>

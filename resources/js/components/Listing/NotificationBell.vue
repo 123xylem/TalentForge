@@ -10,7 +10,7 @@ const showNotifications = ref(false);
 notifications.value = usePage().props.auth.user.notifications.data;
 // Use computed instead of watch
 const unreadNotifications = computed(() => notifications.value.filter((notification) => notification.read_at === null)) ?? {};
-
+console.log(notifications.value, 'notifications');
 const form = useForm({
     notification_id: '',
 });
@@ -70,7 +70,12 @@ const submitAll = () => {
                         :class="{ 'bg-gray-100': notification.read_at === null }"
                         method="POST"
                     >
-                        <div v-if="notification.data.employerAction" class="text-sm text-gray-900">
+                        <div v-if="notification.data.message" class="text-sm text-gray-900">
+                            <a :href="notification.data.url">
+                                {{ notification.data.message }}
+                            </a>
+                        </div>
+                        <div v-else-if="notification.data.employerAction" class="text-sm text-gray-900">
                             <a :href="notification.data.url">
                                 Your application for {{ notification.data.title }} at {{ notification.data.company }} has been
                                 {{ notification.data.status }}
