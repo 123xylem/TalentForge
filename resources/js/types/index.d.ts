@@ -91,6 +91,7 @@ export interface Listing {
     user_id?: number;
     company?: string;
     slug?: string;
+    listingClosed: boolean;
 }
 export interface ListingApplication {
     id: number;

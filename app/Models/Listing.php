@@ -10,6 +10,10 @@ use App\Models\User;
 // the controller interacts with this by using the model to query the database.
 class Listing extends Model
 {
+
+    protected $casts = [
+        'listingClosed' => 'boolean',
+    ];
     // 
     protected $fillable = [
         'title',
@@ -21,6 +25,7 @@ class Listing extends Model
         'image',
         'url',
         'user_id',
+        'listingClosed',
     ];
 
     public function owner()
