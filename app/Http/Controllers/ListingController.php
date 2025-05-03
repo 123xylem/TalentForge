@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Filters\ListingFilter;
-
+use App\Notifications\ListingUpdate;
 
 class ListingController extends Controller
 {
@@ -26,18 +26,17 @@ class ListingController extends Controller
     {
         $filterParams = count($request->all()) > 0;
         if ($filterParams) {
-            $listings = Listing::filter($filters)->paginate(6);
+            $listings = Listing::filter($filters)->where('listingClosed', false)->paginate(6);
         } else {
             $page = request()->input('page', 1);
             $cacheKey = 'listings_page_' . $page;
             $listings = Cache::remember($cacheKey, 60 * 120, function () {
-                return Listing::with('skills', 'categories')->paginate(6);
+                return Listing::where('listingClosed', false)->with('skills', 'categories')->paginate(6)->toArray();
             });
         }
         //TODO; should filters be passed to the view?
         return Inertia::render('Listings/Index', [
             'paginatedListingData' => $listings,
-            // 'filters' => $filters,
         ]);
     }
 
@@ -63,7 +62,9 @@ class ListingController extends Controller
         $listing->categories()->attach($request->categories);
         $listing->save();
         Cache::forget('listings');
-        Cache::put('listings', Listing::with('skills', 'categories'));
+        //Bear in mind caching Model with associations means data stored in db is arary and not elowquent object
+        // So you cant use it for queries just for sending to frontend display
+        Cache::put('listings', Listing::with('skills', 'categories')->get()->toArray());
 
         return redirect()
             ->route('listings.show', $listing->id)
@@ -76,6 +77,7 @@ class ListingController extends Controller
      */
     public function show(Listing $listing)
     {
+        Cache::forget('listing' . $listing->id);
         $isOwner = $listing->user_id === Auth::id();
         if (!$isOwner) {
             $userApplicationStatus = $listing->applications->where('user_id', Auth::id())->first()->status ?? null;
@@ -133,9 +135,14 @@ class ListingController extends Controller
      */
     public function update(ListingRequest $request, Listing $listing)
     {
-        $listing->update($request->all());
-        $listing->skills()->sync($request->skills);
-        $listing->categories()->sync($request->categories);
+        if ($request->listingClosed !== $listing->listingClosed) {
+            $this->notifyApplicants($listing, $request->listing->applicants);
+            $listing->update($request->only(['listingClosed']));
+        } else {
+            $listing->update($request->all());
+            $listing->skills()->sync($request->skills);
+            $listing->categories()->sync($request->categories);
+        }
         Cache::forget('listing' . $listing->id);
         Cache::put('listing' . $listing->id, $listing);
         return redirect()
@@ -164,5 +171,16 @@ class ListingController extends Controller
         return redirect()
             ->route('listings.index')
             ->with('flash', ['success' => 'Listing deleted successfully!']);
+    }
+
+
+    //TODO: Move to a service
+    //TODO: Create the listngClosed Notifcation
+    //TODO dont include closed listings in listings data to non applied users
+    public function notifyApplicants(Listing $listing, $applicants)
+    {
+        foreach ($applicants as $applicant) {
+            $applicant->notify(new ListingUpdate($listing, $applicant));
+        }
     }
 }
