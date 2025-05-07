@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Facades\Log;
 //TODO add Caching to notifications
 class NotificationController extends Controller
 {
@@ -17,17 +18,28 @@ class NotificationController extends Controller
 
     public function markAsRead(Request $request)
     {
-        $notification_id = $request->notification_id ?? $request->route('notification');
-        $user = $request->user();
-        $user->unreadNotifications->where('id', $notification_id)->markAsRead();
+        try {
+            $notification_id = $request->notification_id ?? $request->route('notification');
+            $user = $request->user();
+            $user->unreadNotifications->where('id', $notification_id)->markAsRead();
 
-        return back();
+            return back();
+        } catch (\Exception $e) {
+            \Log::error([$e, 'Failed to mark notification as read']);
+            return back()->with('error', 'Failed to mark notification as read');
+        }
     }
 
     public function markAllAsRead(Request $request)
     {
-        $request->user()->unreadNotifications->markAsRead();
-        return back();
+        try {
+            $request->user()->unreadNotifications->markAsRead();
+
+            return back();
+        } catch (\Exception $e) {
+            \Log::error([$e, 'Failed to mark all notifications as read']);
+            return back()->with('error', 'Failed to mark all notifications as read');
+        }
     }
 
     public function clear(Request $request)
