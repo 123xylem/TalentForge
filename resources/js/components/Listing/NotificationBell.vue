@@ -18,21 +18,30 @@ const form = useForm({
 const submitOne = (id: string) => {
     event?.preventDefault();
     form.notification_id = id;
+    notifications.value
+        .filter((notification) => notification.id === id)
+        .map((notification) => {
+            notification.read_at = 'Temp Now';
+        });
+
     form.patch(route('notifications.markAsRead', id), {
         preserveScroll: true,
-        preserveState: false,
-        onSuccess: () => {
-            notifications.value = usePage().props.auth.user.notifications;
+        // Dont update Page as we want notifications to be updated without refresh
+        onError: (e) => {
+            console.log(e, 'error');
         },
     });
 };
 
 const submitAll = () => {
+    notifications.value.map((notification) => {
+        notification.read_at = 'Temp Now';
+    });
     form.patch(route('notifications.markAllAsRead'), {
         preserveScroll: true,
-        preserveState: false,
-        onSuccess: () => {
-            notifications.value = usePage().props.auth.user.notifications;
+        // preserveState: false,
+        onError: (e) => {
+            console.log(e, 'error');
         },
     });
 };
