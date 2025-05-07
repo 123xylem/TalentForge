@@ -14,7 +14,7 @@ console.log(notifications.value, 'notifications');
 const form = useForm({
     notification_id: '',
 });
-
+//TODO add correct url for message request notification
 const submitOne = (id: string) => {
     event?.preventDefault();
     form.notification_id = id;

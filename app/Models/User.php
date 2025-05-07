@@ -63,9 +63,22 @@ class User extends Authenticatable
         return $this->skills()->count() > 0 && $this->cv !== null;
     }
 
+    public function isInConversation($conversationId)
+    {
+        return $this->conversations()->where('conversation_id', $conversationId)->exists();
+    }
 
+    public function conversations()
+    {
+        return $this->hasMany(Conversation::class);
+    }
 
-
+    public function connections()
+    {
+        return $this->belongsToMany(User::class, 'connections', 'user_id', 'connected_user_id')
+            ->withPivot('is_accepted')
+            ->withTimestamps();
+    }
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -77,8 +90,13 @@ class User extends Authenticatable
             ->markAsRead();
     }
 
-
-
+    public function canMessage($userId)
+    {
+        return $this->connections()
+            ->where('connected_user_id', $userId)
+            ->where('is_accepted', true)
+            ->exists();
+    }
 
     /**
      * The attributes that should be hidden for serialization.

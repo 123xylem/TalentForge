@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
-import NotificationBell from '@/components/Listing/NotificationBell.vue';
+import NotificationBell from '@/components/Messaging/NotificationBell.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import type { BreadcrumbItemType } from '@/types';
 

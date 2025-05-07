@@ -7,6 +7,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ListingApplicationController;
 use App\Http\Controllers\SkillController;
+use App\Http\Controllers\ConnectionController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -44,3 +46,8 @@ Route::middleware(['auth', 'verified'])
     ->group(function () {
         Route::get('/', 'index')->name('index');
     });
+
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
+
+Route::post('/connections/{user}', [ConnectionController::class, 'store']);
+Route::post('/connections/{user}/accept', [ConnectionController::class, 'accept']);

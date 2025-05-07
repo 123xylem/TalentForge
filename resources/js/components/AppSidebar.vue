@@ -7,7 +7,7 @@ import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import { LayoutGrid, User } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-
+import UserProfileList from './UserProfile/List.vue';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -47,5 +47,7 @@ const footerNavItems: NavItem[] = [
             <NavUser />
         </SidebarFooter>
     </Sidebar>
+    <UserProfileList />
+
     <slot />
 </template>
