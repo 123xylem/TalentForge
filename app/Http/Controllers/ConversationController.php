@@ -32,7 +32,7 @@ class ConversationController extends Controller
      */
     public function store(Request $request)
     {
-        $userIds = $request->user_ids;
+        $userIds = json_encode($request->user_ids);
         $conversation = Conversation::create([
             'user_ids' => $userIds
         ]);

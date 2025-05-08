@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Message } from '@/types';
 import { useForm } from '@inertiajs/vue3';
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
     currentUser: Number,
@@ -15,22 +15,6 @@ console.log(props, 'Recipient');
 
 const messageStream = ref<Message[]>([]);
 const conversationId = ref(0);
-
-onMounted(() => {
-    conversationForm.get(route('conversations.getOne', { recipient_id: props.recipient?.id, user_id: props.currentUser }), {
-        preserveScroll: true,
-        preserveState: true,
-        onSuccess: (data) => {
-            console.log(data, 'Conversation data');
-            conversationId.value = Number(data.props.id);
-            const channel = window.Echo.channel('conversation.' + conversationId.value);
-            channel.listen('.new-message', function (data: Message) {
-                console.log(data, 'Message sent');
-                messageStream.value.push(data);
-            });
-        },
-    });
-});
 
 const emit = defineEmits(['activate']);
 
@@ -62,8 +46,21 @@ watch(
     },
 );
 
-const toggleExpand = () => {
-    console.log('toggleExpand');
+const toggleExpand = async () => {
+    const response = await fetch(route('conversations.getOne', { recipient_id: props.recipient?.id, user_id: props.currentUser }), {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    const data = await response.json();
+    conversationId.value = Number(data.conversation_id);
+    console.log(conversationId.value, 'Conversation ID');
+    const channel = window.Echo.channel('conversation.' + conversationId.value);
+    channel.listen('.new-message', function (data: Message) {
+        console.log(data, 'Message sent');
+        messageStream.value.push(data);
+    });
     emit('activate');
     isExpanded.value = !isExpanded.value;
 };

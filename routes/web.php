@@ -55,4 +55,5 @@ Route::post('/connections/{user}', [ConnectionController::class, 'store']);
 Route::post('/connections/{user}/accept', [ConnectionController::class, 'accept']);
 Route::post('/connections/{user}/decline', [ConnectionController::class, 'decline']);
 
-// Route::get('/conversations', [ConversationController::class, 'getOne'])->name('conversations.getOne');
+Route::get('/conversations', [ConversationController::class, 'getOne'])
+    ->name('conversations.getOne');
