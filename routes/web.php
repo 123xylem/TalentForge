@@ -9,6 +9,8 @@ use App\Http\Controllers\ListingApplicationController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ConversationController;
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -52,3 +54,5 @@ Route::get('/users', [UserController::class, 'index'])->name('users.index');
 Route::post('/connections/{user}', [ConnectionController::class, 'store']);
 Route::post('/connections/{user}/accept', [ConnectionController::class, 'accept']);
 Route::post('/connections/{user}/decline', [ConnectionController::class, 'decline']);
+
+// Route::get('/conversations', [ConversationController::class, 'getOne'])->name('conversations.getOne');

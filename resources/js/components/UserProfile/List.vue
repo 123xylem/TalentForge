@@ -13,7 +13,7 @@ const users = ref<User[]>([]);
 const isConnected = ref<Record<number, boolean>>({});
 const hasPendingRequest = ref<Record<number, boolean>>({});
 const showMessaging = ref(false);
-const currentUser = usePage().props.user;
+const currentUser = usePage().props.auth.user.id;
 
 const activeConversationId = ref<number | null>(null);
 onMounted(() => {
@@ -81,6 +81,7 @@ const changeActiveConversation = (userId: number) => {
                             :is-active="activeConversationId === user.id"
                             @activate="changeActiveConversation(user.id)"
                             :recipient="user"
+                            :currentUser="currentUser"
                         />
                     </div>
                 </div>

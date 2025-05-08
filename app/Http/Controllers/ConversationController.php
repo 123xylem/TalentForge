@@ -40,7 +40,16 @@ class ConversationController extends Controller
         return redirect()->route('conversations.show', $conversation->id);
     }
 
-    /** 
+
+
+    public function getOne(Request $request)
+    {
+        $conversation = Conversation::firstOrCreate([
+            'user_ids' => json_encode([$request->user_id, $request->recipient_id])
+        ]);
+        return response()->json(['conversation_id' => $conversation->id]);
+    }
+    /**
      * Display the specified resource.
      */
     public function show(Conversation $conversation)

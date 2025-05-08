@@ -135,3 +135,12 @@ export interface Notification {
     notifiable_id: number;
     data: NotificationData;
 }
+
+export interface Message {
+    id: number;
+    content: string;
+    created_at: string;
+    updated_at: string;
+    user_id: number;
+    conversation_id: number;
+}

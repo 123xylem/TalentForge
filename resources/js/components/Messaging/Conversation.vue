@@ -1,15 +1,35 @@
 <script setup lang="ts">
+import { Message } from '@/types';
 import { useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
-const channel = window.Echo.channel('messaging.1');
-channel.listen('.my-event', function (data) {
-    alert(JSON.stringify(data));
-});
+import { onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
-    user: Object,
+    currentUser: Number,
     isActive: Boolean,
     recipient: Object,
+});
+
+const conversationForm = useForm({});
+
+console.log(props, 'Recipient');
+
+const messageStream = ref<Message[]>([]);
+const conversationId = ref(0);
+
+onMounted(() => {
+    conversationForm.get(route('conversations.getOne', { recipient_id: props.recipient?.id, user_id: props.currentUser }), {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: (data) => {
+            console.log(data, 'Conversation data');
+            conversationId.value = Number(data.props.id);
+            const channel = window.Echo.channel('conversation.' + conversationId.value);
+            channel.listen('.new-message', function (data: Message) {
+                console.log(data, 'Message sent');
+                messageStream.value.push(data);
+            });
+        },
+    });
 });
 
 const emit = defineEmits(['activate']);
@@ -18,8 +38,9 @@ const message = ref('');
 const isExpanded = ref(false);
 
 const messageForm = useForm({
-    user_id: props.user?.id,
+    user_id: props.currentUser?.id,
     message: message.value,
+    conversation_id: conversationId.value,
 });
 
 const sendMessage = () => {
@@ -69,7 +90,7 @@ const toggleExpand = () => {
 
             <!-- Messages Area -->
             <div v-if="isExpanded" class="h-100% overflow-y-auto p-4">
-                <div class="messages space-y-2">
+                <div class="messages space-y-2 overflow-y-auto">
                     <div class="message rounded-lg bg-gray-100 p-2">
                         <div class="message-content text-black">Hello</div>
                     </div>
