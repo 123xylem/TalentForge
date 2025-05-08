@@ -10,7 +10,7 @@ import { defineEmits, defineProps, onMounted, ref } from 'vue';
 defineProps<{
     title: string;
     applicationFilter?: boolean;
-    filters: {
+    filters?: {
         textSearch: string;
         locationSearch: string;
         selectedCategories: string[];

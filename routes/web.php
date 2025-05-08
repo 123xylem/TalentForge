@@ -51,3 +51,4 @@ Route::get('/users', [UserController::class, 'index'])->name('users.index');
 
 Route::post('/connections/{user}', [ConnectionController::class, 'store']);
 Route::post('/connections/{user}/accept', [ConnectionController::class, 'accept']);
+Route::post('/connections/{user}/decline', [ConnectionController::class, 'decline']);

@@ -14,6 +14,7 @@ console.log(notifications.value, 'notifications');
 const form = useForm({
     notification_id: '',
 });
+
 //TODO add correct url for message request notification
 const submitOne = (id: string) => {
     event?.preventDefault();
@@ -42,6 +43,29 @@ const submitAll = () => {
         // preserveState: false,
         onError: (e) => {
             console.log(e, 'error');
+        },
+    });
+};
+const connectionForm = useForm({});
+
+const handleConnectionRequest = async (id: string, url: string) => {
+    await form.patch(route('notifications.markAsRead', id), {
+        preserveScroll: true,
+        // Dont update Page as we want notifications to be updated without refresh
+        onError: (e) => {
+            console.log(e, 'error');
+        },
+        onSuccess: () => {
+            connectionForm.post(url, {
+                preserveScroll: true,
+                preserveState: false,
+                onSuccess: (message) => {
+                    console.log(message, 'message');
+                },
+                onError: (e) => {
+                    console.log(e, 'error');
+                },
+            });
         },
     });
 };
@@ -80,9 +104,28 @@ const submitAll = () => {
                         method="POST"
                     >
                         <div v-if="notification.data.message" class="text-sm text-gray-900">
-                            <a :href="notification.data.url">
+                            <div v-if="notification.data.connectionRequest">
                                 {{ notification.data.message }}
-                            </a>
+                                <div v-if="notification.read_at === null" class="flex gap-2">
+                                    <a
+                                        class="rounded-full bg-blue-500 px-2 py-1 text-xs text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
+                                        @click="handleConnectionRequest(notification.id, notification.data.url)"
+                                    >
+                                        Accept
+                                    </a>
+                                    <a
+                                        class="rounded-full bg-red-500 px-2 py-1 text-xs text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
+                                        @click="handleConnectionRequest(notification.id, notification.data.decline_url)"
+                                    >
+                                        Decline
+                                    </a>
+                                </div>
+                            </div>
+                            <div v-else>
+                                <a :href="notification.data.url">
+                                    {{ notification.data.message }}
+                                </a>
+                            </div>
                         </div>
                         <div v-else-if="notification.data.employerAction" class="text-sm text-gray-900">
                             <a :href="notification.data.url">

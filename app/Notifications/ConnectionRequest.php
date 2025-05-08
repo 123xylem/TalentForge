@@ -51,6 +51,8 @@ class ConnectionRequest extends Notification
             'user_id' => $this->user->id,
             'message' => 'Connection Request from ' . $this->user->name,
             'url' => url('/connections/' . $this->user->id . '/accept'),
+            'decline_url' => url('/connections/' . $this->user->id . '/decline'),
+            'connectionRequest' => true,
         ];
     }
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import MessagingModal from '@/components/Messaging/Index.vue';
+import Conversation from '@/components/Messaging/Conversation.vue';
 import { usePage } from '@inertiajs/vue3';
-import { Mail, MessageCircle } from 'lucide-vue-next';
+import { MessageCircle } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 interface User {
     id: number;
@@ -14,8 +14,8 @@ const isConnected = ref<Record<number, boolean>>({});
 const hasPendingRequest = ref<Record<number, boolean>>({});
 const showMessaging = ref(false);
 const currentUser = usePage().props.user;
-const showMessagingModal = ref(false);
 
+const activeConversationId = ref<number | null>(null);
 onMounted(() => {
     // Fetch users and their connection status
     try {
@@ -37,19 +37,17 @@ onMounted(() => {
 });
 
 const sendConnectionRequest = (userId: number) => {
+    hasPendingRequest.value[userId] = true;
     fetch(`/connections/${userId}`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
         },
-    }).then(() => {
-        hasPendingRequest.value[userId] = true;
     });
 };
 
-const openMessaging = (userId: number) => {
-    showMessaging.value = true;
-    console.log(userId);
+const changeActiveConversation = (userId: number) => {
+    return activeConversationId.value == userId ? (activeConversationId.value = null) : (activeConversationId.value = userId);
 };
 </script>
 
@@ -66,8 +64,7 @@ const openMessaging = (userId: number) => {
             <div class="grid gap-1">
                 <div v-for="user in users" :key="user.id" class="flex items-center justify-between rounded-lg bg-white p-1 shadow">
                     <div>
-                        <h3 class="text-sm font-medium text-black">{{ user.name }}</h3>
-                        <!-- Add other user info -->
+                        <h3 v-if="activeConversationId != user.id" class="text-sm font-medium text-black">{{ user.name }}</h3>
                     </div>
                     <div>
                         <button
@@ -78,9 +75,13 @@ const openMessaging = (userId: number) => {
                             Connect
                         </button>
                         <span v-else-if="hasPendingRequest[user.id]" class="text-gray-500"> Request Pending </span>
-                        <!-- TODO onclick open messaging -->
-                        <span v-else @click="openMessaging(user.id)" class="text-green-500"> Message <Mail class="h-4 w-4" /></span>
-                        <MessagingModal v-if="showMessagingModal" :currentUser="currentUser" />
+                        <Conversation
+                            v-if="isConnected[user.id]"
+                            :key="user.id"
+                            :is-active="activeConversationId === user.id"
+                            @activate="changeActiveConversation(user.id)"
+                            :recipient="user"
+                        />
                     </div>
                 </div>
             </div>

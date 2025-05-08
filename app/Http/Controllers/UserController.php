@@ -13,11 +13,11 @@ class UserController extends Controller
   {
     $users = Cache::remember('users-' . Auth::user()->id, 60 * 120, function () {
       return User::where('id', '!=', Auth::user()->id)
-        ->whereNotIn('id', function ($query) {
-          $query->select('connected_user_id')
-            ->from('connections')
-            ->where('user_id', Auth::id());
-        })
+        // ->whereNotIn('id', function ($query) {
+        //   $query->select('connected_user_id')
+        //     ->from('connections')
+        //     ->where('user_id', Auth::id());
+        // })
         ->paginate(20);
     });
 
