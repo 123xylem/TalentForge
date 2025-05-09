@@ -45,7 +45,7 @@ class ConversationController extends Controller
 
 
 
-    public function getOrCreateOneConversation(Request $request)
+    public function getOrCreateOne(Request $request)
     {
         $userIds = [$request->recipient_id, $request->user_id];
         sort($userIds);

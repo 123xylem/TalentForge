@@ -9,6 +9,14 @@ window.Echo = new Echo({
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
     wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-    forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
+    // forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
+    forceTLS: false,
     enabledTransports: ['ws', 'wss'],
+    // authEndpoint: '/broadcasting/auth',
+    withCredentials: true,
+    auth: {
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+    },
 });

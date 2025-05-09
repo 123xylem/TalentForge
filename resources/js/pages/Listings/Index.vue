@@ -17,7 +17,7 @@ const { filters, computedFilters, resetFilters, applyFilters, onPageChange, upda
     'listings.index',
     'paginatedListingData',
 );
-
+//TODO do filters get called every time page is loaded?
 onMounted(initializeFiltersFromUrl);
 </script>
 

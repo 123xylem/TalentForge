@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Message } from '@/types';
 import { useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps({
     currentUser: { type: Number, required: true },
@@ -24,7 +24,6 @@ const messageForm = useForm({
 });
 
 const sendMessage = () => {
-    console.log(conversationId.value, 'Conversation ID');
     messageForm.content = message.value;
     messageForm.conversation_id = conversationId.value;
     messageForm.post(route('messages.store'), {
@@ -45,27 +44,46 @@ watch(
     },
 );
 
-const channel = window.Echo.channel('private.conversation.' + conversationId.value);
-channel.listen('.new-message', function (data: Message) {
-    console.log(data, 'Message sent!');
-    messageStream.value.push(data);
+let currentChannel: any = null;
+
+// Cleanup function
+const cleanupChannel = () => {
+    if (currentChannel) {
+        currentChannel.unsubscribe();
+        currentChannel = null;
+    }
+};
+
+// Watch for conversationId changes
+watch(conversationId, (newId) => {
+    // cleanupChannel();
+    console.log(newId, 'newId TRIGGERDED');
+    if (newId) {
+        currentChannel = window.Echo.private(`conversation.${newId}`);
+        currentChannel.listen('.new-message', function (data: Message) {
+            console.log(data, 'Message received!!!!');
+            messageStream.value.push(data);
+        });
+    }
 });
 
-//TODO: dont trigger convo search on closing chat (ispenaded toggle kills props)
+// Cleanup on component unmount
+onUnmounted(() => {
+    // cleanupChannel();
+});
+
 const toggleExpand = async () => {
     if (conversationId.value != 0) {
         isExpanded.value = !isExpanded.value;
+        emit('activate');
         return;
     }
-    const response = await fetch(
-        route('conversations.getOrCreateOneConversation', { recipient_id: props.recipient?.id, user_id: props.currentUser }),
-        {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+    const response = await fetch(route('conversations.getOrCreateOne', { recipient_id: props.recipient?.id, user_id: props.currentUser }), {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
         },
-    );
+    });
     const data = await response.json();
     conversationId.value = Number(data.conversation_id);
 
@@ -82,7 +100,7 @@ const toggleExpand = async () => {
         >
             <!-- Header -->
             <div v-if="isExpanded" class="flex cursor-pointer items-center justify-between bg-blue-500 p-2 text-black">
-                <span>{{ recipient?.name }}</span>
+                <span>{{ recipient.name }}</span>
                 <div
                     v-if="isExpanded"
                     @click="toggleExpand"
@@ -111,7 +129,13 @@ const toggleExpand = async () => {
                         class="flex-1 rounded border p-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Type a message..."
                     />
-                    <button type="submit" class="rounded bg-blue-500 px-4 py-2 text-black transition-colors hover:bg-blue-600">Send</button>
+                    <button
+                        :disabled="message.length === 0"
+                        type="submit"
+                        class="rounded bg-blue-500 px-4 py-2 text-black transition-colors hover:bg-blue-600"
+                    >
+                        Send
+                    </button>
                 </form>
             </div>
         </div>

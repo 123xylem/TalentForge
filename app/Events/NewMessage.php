@@ -32,7 +32,8 @@ class NewMessage implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('private.conversation.' . $this->conversationId),
+            new PrivateChannel('conversation.' . $this->conversationId),
+            new Channel('conversation.' . $this->conversationId),
         ];
     }
 

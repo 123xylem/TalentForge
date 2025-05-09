@@ -47,7 +47,11 @@ const sendConnectionRequest = (userId: number) => {
 };
 
 const changeActiveConversation = (userId: number) => {
-    return activeConversationId.value == userId ? (activeConversationId.value = null) : (activeConversationId.value = userId);
+    if (activeConversationId.value === userId) {
+        activeConversationId.value = null;
+    } else {
+        activeConversationId.value = userId;
+    }
 };
 </script>
 
@@ -64,7 +68,10 @@ const changeActiveConversation = (userId: number) => {
             <div class="grid gap-1">
                 <div v-for="user in users" :key="user.id" class="flex items-center justify-between rounded-lg bg-white p-1 shadow">
                     <div>
-                        <h3 v-if="activeConversationId != user.id" class="text-sm font-medium text-black">{{ user.name }}</h3>
+                        <h3 v-if="activeConversationId != user.id" class="text-sm font-medium text-black">
+                            {{ user.name }}
+                            {{ activeConversationId }}
+                        </h3>
                     </div>
                     <div>
                         <button
