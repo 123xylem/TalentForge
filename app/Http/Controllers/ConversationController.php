@@ -32,21 +32,27 @@ class ConversationController extends Controller
      */
     public function store(Request $request)
     {
-        $userIds = json_encode($request->user_ids);
-        $conversation = Conversation::create([
-            'user_ids' => $userIds
-        ]);
+        // $userIds = json_encode($request->user_ids);
+        // $userIds = [$request->user_ids];
+        // sort($userIds);
+        // $userIds = json_encode($userIds);
+        // $conversation = Conversation::create([
+        //     'user_ids' => $userIds
+        // ]);
 
-        return redirect()->route('conversations.show', $conversation->id);
+        // return redirect()->route('conversations.show', $conversation->id);
     }
 
 
 
-    public function getOne(Request $request)
+    public function getOrCreateOneConversation(Request $request)
     {
+        $userIds = [$request->recipient_id, $request->user_id];
+        sort($userIds);
         $conversation = Conversation::firstOrCreate([
-            'user_ids' => json_encode([$request->user_id, $request->recipient_id])
+            'user_ids' => json_encode($userIds)  // Save as JSON string
         ]);
+
         return response()->json(['conversation_id' => $conversation->id]);
     }
     /**

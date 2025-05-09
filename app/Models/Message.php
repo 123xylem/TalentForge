@@ -8,7 +8,7 @@ use App\Models\User;
 
 class Message extends Model
 {
-    protected $fillable = ['message', 'conversation_id', 'user_id'];
+    protected $fillable = ['content', 'conversation_id', 'user_id'];
 
     public function conversation()
     {

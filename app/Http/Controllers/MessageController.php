@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\NewMessage;
 
 class MessageController extends Controller
 {
@@ -30,10 +31,14 @@ class MessageController extends Controller
     public function store(Request $request)
     {
         Message::create([
-            'content' => $request->message,
+            'content' => $request->content,
             'conversation_id' => $request->conversation_id,
             'user_id' => Auth::user()->id
         ]);
+
+        broadcast(new NewMessage($request->content, $request->conversation_id, Auth::user()->id));
+
+        return back();
     }
 
     /**

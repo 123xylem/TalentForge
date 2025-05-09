@@ -4,14 +4,10 @@ import { useForm } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 
 const props = defineProps({
-    currentUser: Number,
-    isActive: Boolean,
-    recipient: Object,
+    currentUser: { type: Number, required: true },
+    isActive: { type: Boolean, required: true },
+    recipient: { type: Object, required: true },
 });
-
-const conversationForm = useForm({});
-
-console.log(props, 'Recipient');
 
 const messageStream = ref<Message[]>([]);
 const conversationId = ref(0);
@@ -22,16 +18,19 @@ const message = ref('');
 const isExpanded = ref(false);
 
 const messageForm = useForm({
-    user_id: props.currentUser?.id,
-    message: message.value,
+    user_id: props.currentUser,
+    content: '',
     conversation_id: conversationId.value,
 });
 
 const sendMessage = () => {
+    console.log(conversationId.value, 'Conversation ID');
+    messageForm.content = message.value;
+    messageForm.conversation_id = conversationId.value;
     messageForm.post(route('messages.store'), {
         onSuccess: (msg) => {
-            console.log(msg, 'Message sent');
             messageForm.reset();
+            message.value = '';
         },
         onError: (error) => {
             console.log(error, 'Error sending message');
@@ -46,21 +45,30 @@ watch(
     },
 );
 
+const channel = window.Echo.channel('private.conversation.' + conversationId.value);
+channel.listen('.new-message', function (data: Message) {
+    console.log(data, 'Message sent!');
+    messageStream.value.push(data);
+});
+
+//TODO: dont trigger convo search on closing chat (ispenaded toggle kills props)
 const toggleExpand = async () => {
-    const response = await fetch(route('conversations.getOne', { recipient_id: props.recipient?.id, user_id: props.currentUser }), {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
+    if (conversationId.value != 0) {
+        isExpanded.value = !isExpanded.value;
+        return;
+    }
+    const response = await fetch(
+        route('conversations.getOrCreateOneConversation', { recipient_id: props.recipient?.id, user_id: props.currentUser }),
+        {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
         },
-    });
+    );
     const data = await response.json();
     conversationId.value = Number(data.conversation_id);
-    console.log(conversationId.value, 'Conversation ID');
-    const channel = window.Echo.channel('conversation.' + conversationId.value);
-    channel.listen('.new-message', function (data: Message) {
-        console.log(data, 'Message sent');
-        messageStream.value.push(data);
-    });
+
     emit('activate');
     isExpanded.value = !isExpanded.value;
 };

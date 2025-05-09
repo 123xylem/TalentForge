@@ -52,7 +52,7 @@ const changeActiveConversation = (userId: number) => {
 </script>
 
 <template>
-    <div id="messaging-container" class="fixed bottom-4 right-4 z-50 cursor-pointer hover:cursor-pointer">
+    <div id="messaging-container" class="fixed bottom-10 right-5 z-50 cursor-pointer hover:cursor-pointer">
         <div @click="showMessaging = !showMessaging">
             <div v-if="showMessaging" class="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">X</div>
             <div v-else>

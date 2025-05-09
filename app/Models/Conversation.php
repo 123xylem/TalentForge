@@ -12,6 +12,7 @@ class Conversation extends Model
     protected $casts = [
         'user_ids' => 'array'
     ];
+
     protected $fillable = [
         'name',
         'user_ids'
