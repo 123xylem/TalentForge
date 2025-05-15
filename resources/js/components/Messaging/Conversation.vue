@@ -2,7 +2,6 @@
 import { Message } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { onUnmounted, ref, watch } from 'vue';
-
 const props = defineProps({
     currentUser: { type: Number, required: true },
     isActive: { type: Boolean, required: true },
@@ -11,6 +10,7 @@ const props = defineProps({
 
 const messageStream = ref<Message[]>([]);
 const conversationId = ref(0);
+const conversationNames = ref<{ [key: number]: string }>({});
 
 const emit = defineEmits(['activate']);
 
@@ -41,6 +41,7 @@ watch(
     () => props.isActive,
     (newValue) => {
         isExpanded.value = newValue;
+        cleanupChannel();
     },
 );
 
@@ -53,23 +54,44 @@ const cleanupChannel = () => {
         currentChannel = null;
     }
 };
-
 // Watch for conversationId changes
-watch(conversationId, (newId) => {
-    // cleanupChannel();
-    console.log(newId, 'newId TRIGGERDED');
+watch(conversationId, async (newId) => {
+    cleanupChannel();
     if (newId) {
-        currentChannel = window.Echo.private(`conversation.${newId}`);
-        currentChannel.listen('.new-message', function (data: Message) {
-            console.log(data, 'Message received!!!!');
-            messageStream.value.push(data);
-        });
+        await fetch(route('messages.index', { conversation_id: newId }), {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data, 'Data');
+                messageStream.value = data;
+            });
+        subscribeToChannel(newId);
     }
 });
 
-// Cleanup on component unmount
+const subscribeToChannel = (newId: number) => {
+    currentChannel = window.Echo.private(`conversation.${newId}`);
+    currentChannel.listen('.new-message', function (data: Message) {
+        messageStream.value = [...messageStream.value, data];
+        if (messagesContainer.value) {
+            messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+            console.log(messagesContainer.value.scrollTop, 'Scroll top');
+        } else {
+            console.log('No messages container');
+        }
+    });
+};
+
+const messagesContainer = ref<HTMLDivElement | null>(null);
+//TODO: AUto scroll messages
+//TODO: make it faster?
+//TODO: work out bugs
 onUnmounted(() => {
-    // cleanupChannel();
+    cleanupChannel();
 });
 
 const toggleExpand = async () => {
@@ -86,13 +108,13 @@ const toggleExpand = async () => {
     });
     const data = await response.json();
     conversationId.value = Number(data.conversation_id);
-
+    conversationNames.value = data.names;
     emit('activate');
     isExpanded.value = !isExpanded.value;
 };
 </script>
 <template>
-    <div class="" id="messaging-container">
+    <div class="z-50" id="messaging-container">
         <!-- Chat Button/Modal -->
         <div
             class="overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300 ease-in-out"
@@ -112,10 +134,21 @@ const toggleExpand = async () => {
             <div v-else @click="toggleExpand" class="rounded bg-blue-500 px-1 py-1 text-sm hover:bg-blue-600">Chat</div>
 
             <!-- Messages Area -->
-            <div v-if="isExpanded" class="h-100% overflow-y-auto p-4">
-                <div class="messages space-y-2 overflow-y-auto">
-                    <div class="message rounded-lg bg-gray-100 p-2">
-                        <div class="message-content text-black">Hello</div>
+            <div v-if="isExpanded" ref="messagesContainer" class="y-2 max-h-[60vh] cursor-default overflow-scroll p-4">
+                <div v-for="message in messageStream" :key="message.id">
+                    <div
+                        class="message mt-2 rounded-lg p-2"
+                        :class="
+                            message.user_id === currentUser
+                                ? 'self-start bg-green-500 text-left text-white'
+                                : 'self-end bg-blue-100 text-right text-black'
+                        "
+                    >
+                        <div class="message-content">
+                            <p class="text-xs italic">{{ message.user_id === currentUser ? 'You' : conversationNames[message.user_id] }}</p>
+                            <p>{{ message.content }}</p>
+                        </div>
+                        <p class="w-full text-right text-xs">{{ new Date(message.created_at).toLocaleString() }}</p>
                     </div>
                 </div>
             </div>
@@ -132,7 +165,7 @@ const toggleExpand = async () => {
                     <button
                         :disabled="message.length === 0"
                         type="submit"
-                        class="rounded bg-blue-500 px-4 py-2 text-black transition-colors hover:bg-blue-600"
+                        class="rounded bg-blue-500 px-4 py-2 text-black transition-colors hover:cursor-pointer hover:bg-blue-600"
                     >
                         Send
                     </button>

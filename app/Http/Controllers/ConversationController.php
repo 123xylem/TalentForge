@@ -18,8 +18,9 @@ class ConversationController extends Controller
     {
         //
         $conversations = Conversation::where('user_id', Auth::user()->id)->get();
-
-        return  $conversations;
+        return $conversations->map(function ($conversation) {
+            return $conversation->messages;
+        });
     }
 
     /**
@@ -47,13 +48,39 @@ class ConversationController extends Controller
 
     public function getOrCreateOne(Request $request)
     {
+        // $userIds = [$request->recipient_id, $request->user_id];
+        // sort($userIds);
+        // dd($userIds, json_encode($userIds));
+        // $conversation = Conversation::firstOrCreate([
+        //     'user_ids' => json_encode($userIds)  // Save as JSON string
+        // ]);
+
         $userIds = [$request->recipient_id, $request->user_id];
         sort($userIds);
-        $conversation = Conversation::firstOrCreate([
-            'user_ids' => json_encode($userIds)  // Save as JSON string
-        ]);
 
-        return response()->json(['conversation_id' => $conversation->id]);
+        // Convert to integers for consistent comparison
+        $userIds = array_map('intval', $userIds);
+        $names = [];
+        foreach ($userIds as $id) {
+            $names[$id] = User::find($id)->name;
+        }
+        // Find existing conversation
+        $conversation = Conversation::where(function ($query) use ($userIds) {
+            $query->whereJsonContains('user_ids', $userIds[0])
+                ->whereJsonContains('user_ids', $userIds[1]);
+        })->first();
+        \Log::info('Conversation', [
+            'conversation' => $conversation,
+            'userIds' => $userIds
+        ]);
+        // Create if not found
+        if (!$conversation) {
+            $conversation = Conversation::create([
+                'user_ids' => $userIds
+            ]);
+        }
+
+        return response()->json(['conversation_id' => $conversation->id, 'names' => $names]);
     }
     /**
      * Display the specified resource.

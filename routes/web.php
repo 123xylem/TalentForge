@@ -58,6 +58,8 @@ Route::post('/connections/{user}/decline', [ConnectionController::class, 'declin
 Route::get('/conversations', [ConversationController::class, 'getOrCreateOne'])
     ->name('conversations.getOrCreateOne');
 
+Route::get('/messages', [MessageController::class, 'index'])
+    ->name('messages.index');
 
 Route::post('/messages', [MessageController::class, 'store'])
     ->name('messages.store');

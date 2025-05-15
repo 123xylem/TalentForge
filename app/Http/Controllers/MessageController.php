@@ -6,6 +6,9 @@ use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Events\NewMessage;
+use App\Notifications\MessageRecieved;
+use App\Models\Conversation;
+use App\Models\User;
 
 class MessageController extends Controller
 {
@@ -14,8 +17,11 @@ class MessageController extends Controller
      */
     public function index(Request $request)
     {
-        //
-        $messages = Message::where('conversation_id', $request->conversation_id)->get();
+        $messages = Message::where('conversation_id', $request->conversation_id)->latest()
+            ->limit(30)
+            ->get()
+            ->reverse()
+            ->values();
 
         return $messages;
     }
@@ -30,15 +36,30 @@ class MessageController extends Controller
      */
     public function store(Request $request)
     {
-        Message::create([
+        $message = Message::create([
             'content' => $request->content,
             'conversation_id' => $request->conversation_id,
-            'user_id' => Auth::user()->id
+            'user_id' => Auth::user()->id,
         ]);
 
-        broadcast(new NewMessage($request->content, $request->conversation_id, Auth::user()->id));
-
+        $this->broadCastAndNotifyRecipient($request->content, $request->conversation_id, Auth::user()->id, $message->created_at);
         return back();
+    }
+
+    private function broadCastAndNotifyRecipient($content, $conversationId, $userId, $createdAt)
+    {
+
+        $conversationUsers = Conversation::find($conversationId)->user_ids;
+        $recipient = null;
+        foreach ($conversationUsers as $id) {
+            if ($id !== $userId) {
+                $recipient = User::find($id);
+                break;
+            }
+        }
+        broadcast(new NewMessage($content, $conversationId, $userId, $createdAt));
+        $recipient->notify(new MessageRecieved($content, $conversationId, $recipient->id, $createdAt));
+        return true;
     }
 
     /**
