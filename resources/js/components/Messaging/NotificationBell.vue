@@ -69,6 +69,16 @@ const handleConnectionRequest = async (id: string, url: string) => {
         },
     });
 };
+
+const handleNotificationAction = (conversationId: string, senderId: string) => {
+    console.log(conversationId, 'action');
+    showNotifications.value = false;
+    window.dispatchEvent(
+        new CustomEvent('activate-chat', {
+            detail: { conversationId: conversationId, senderId: senderId },
+        }),
+    );
+};
 </script>
 <template>
     <div class="relative ml-auto">
@@ -120,6 +130,18 @@ const handleConnectionRequest = async (id: string, url: string) => {
                                         Decline
                                     </a>
                                 </div>
+                            </div>
+                            <div v-else-if="notification.data.open_message">
+                                <a
+                                    class="hover:cursor-pointer hover:underline"
+                                    href="#"
+                                    @click="[
+                                        submitOne(notification.id),
+                                        handleNotificationAction(notification.data.conversationId, notification.data.user_id),
+                                    ]"
+                                >
+                                    {{ notification.data.message }}
+                                </a>
                             </div>
                             <div v-else>
                                 <a :href="notification.data.url">

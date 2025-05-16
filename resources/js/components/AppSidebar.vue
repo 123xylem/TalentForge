@@ -7,7 +7,7 @@ import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import { LayoutGrid, User } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-import UserProfileList from './UserProfile/List.vue';
+import UserProfileList from './Messaging/List.vue';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',

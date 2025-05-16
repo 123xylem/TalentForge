@@ -12,17 +12,17 @@ use Illuminate\Support\Facades\Log;
 class MessageRecieved extends Notification implements ShouldQueue
 {
     use Queueable;
-    protected $user;
+    protected $sender;
     /**
      * Create a new notification instance.
      */
-    public function __construct(public $message, public $conversationId, public $userId, public $createdAt)
+    public function __construct(public $message, public $conversationId, public $senderId, public $createdAt)
     {
         $this->message = $message;
         $this->conversationId = $conversationId;
-        $this->userId = $userId;
+        $this->senderId = $senderId;
         $this->createdAt = $createdAt;
-        $this->user = User::find($userId);
+        $this->sender = User::find($senderId);
     }
 
     /**
@@ -32,7 +32,7 @@ class MessageRecieved extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return ['database'];
     }
 
     /**
@@ -41,7 +41,7 @@ class MessageRecieved extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('You have a new message from ' . $this->user->name)
+            ->line('You have a new message from ' . $this->sender->name)
             ->line($this->message)
             ->action('View Message', url('/'));
     }
@@ -56,9 +56,10 @@ class MessageRecieved extends Notification implements ShouldQueue
         return [
             'content' => $this->message,
             'conversationId' => $this->conversationId,
-            'user_id' => $this->userId,
+            'user_id' => $this->senderId,
             'created_at' => $this->createdAt,
-            'message' => 'New Message recieved from ' . $this->user->name,
+            'message' => 'New Message recieved from ' . $this->sender->name,
+            'open_message' => true,
         ];
     }
 }

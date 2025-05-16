@@ -60,9 +60,7 @@ const form = useForm({
 
 const updateListingStatus = () => {
     showConfirmationModal.value = false;
-    console.log('PRE', form.listingClosed, form.skills, form.categories);
     form.listingClosed = !listing?.listingClosed;
-    console.log('Post', form.listingClosed);
 
     form.put(route('listings.update', listing?.id), {
         preserveState: false,
@@ -80,10 +78,10 @@ const updateListingStatus = () => {
     <Head title="Listing" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <ConfirmationModal
-            :title="listingClosed ? 'Reopen Listing' : 'Close Listing'"
-            :description="listingClosed ? 'Are you sure you want to reopen this listing?' : 'Are you sure you want to close this listing?'"
+            :title="listing?.listingClosed ? 'Reopen Listing' : 'Close Listing'"
+            :description="listing?.listingClosed ? 'Are you sure you want to reopen this listing?' : 'Are you sure you want to close this listing?'"
             :confirmModal="showConfirmationModal"
-            :confirmModalText="listingClosed == true ? 'Reopen' : 'Close'"
+            :confirmModalText="listing?.listingClosed == true ? 'Reopen' : 'Close'"
             @confirm="updateListingStatus"
             @cancel="showConfirmationModal = false"
         />

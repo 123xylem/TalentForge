@@ -51,14 +51,16 @@ class MessageController extends Controller
 
         $conversationUsers = Conversation::find($conversationId)->user_ids;
         $recipient = null;
+        $sender = null;
         foreach ($conversationUsers as $id) {
             if ($id !== $userId) {
                 $recipient = User::find($id);
-                break;
+            } else {
+                $sender = User::find($id);
             }
         }
         broadcast(new NewMessage($content, $conversationId, $userId, $createdAt));
-        $recipient->notify(new MessageRecieved($content, $conversationId, $recipient->id, $createdAt));
+        $recipient->notify(new MessageRecieved($content, $conversationId, $sender->id, $createdAt));
         return true;
     }
 
