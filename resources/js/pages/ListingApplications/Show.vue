@@ -58,11 +58,17 @@ const submitForm = (action: string) => {
             onSuccess: () => {
                 window.location.href = route('listings.show', listingApplication?.listing?.id);
             },
+            onError: () => {
+                console.log('error');
+            },
         });
     } else {
         progressForm.patch(route('listing-applications.update', listingApplication?.id), {
             onSuccess: () => {
                 window.location.href = route('listings.show', listingApplication?.listing?.id);
+            },
+            onError: () => {
+                console.log('error');
             },
         });
     }
@@ -112,6 +118,10 @@ const submitForm = (action: string) => {
                 </form>
             </div>
         </div>
+        <div v-if="submitForm.errors.email">{{ submitForm.errors.email }}</div>
+        <div v-if="submitForm.errors.cv">{{ submitForm.errors.cv }}</div>
+        <div v-if="submitForm.errors.cover_letter">{{ submitForm.errors.cover_letter }}</div>
+
         <ConfirmationModal
             :is-open="confirmModal"
             @confirm="submitForm(modalAction)"
