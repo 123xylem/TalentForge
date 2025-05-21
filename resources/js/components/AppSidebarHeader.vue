@@ -17,8 +17,8 @@ defineProps<{
             <SidebarTrigger class="-ml-1" />
             <template v-if="breadcrumbs.length > 0">
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />
-                <NotificationBell />
             </template>
+            <NotificationBell />
         </div>
     </header>
 </template>

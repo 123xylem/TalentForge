@@ -8,7 +8,10 @@ use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Log;
-//TODO add Caching to notifications
+use Illuminate\Support\Facades\Redirect;
+//TODO add Caching to notifications 
+use Illuminate\Support\Facades\Auth;
+
 class NotificationController extends Controller
 {
     public function index(Request $request)
@@ -19,13 +22,25 @@ class NotificationController extends Controller
     public function markAsRead(Request $request)
     {
         try {
+            Log::info('Request details', [
+                'middleware' => $request->route()->middleware(),
+                'auth' => Auth::check(),
+                'user' => Auth::user()?->id,
+                'headers' => $request->headers->all(),
+                'method' => $request->method()
+            ]);
             $notification_id = $request->notification_id ?? $request->route('notification');
             $user = $request->user();
             $user->unreadNotifications->where('id', $notification_id)->markAsRead();
 
-            return back();
+            return Inertia::location(url()->previous());
         } catch (\Exception $e) {
-            \Log::error([$e, 'Failed to mark notification as read']);
+            Log::error('Failed to mark notification as read', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'notification_id' => $request->notification_id ?? $request->route('notification')
+            ]);
+
             return back()->with('error', 'Failed to mark notification as read');
         }
     }

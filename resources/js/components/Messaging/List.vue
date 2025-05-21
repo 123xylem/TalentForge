@@ -49,16 +49,16 @@ const sendConnectionRequest = (userId: number) => {
     });
 };
 
-const changeActiveConversation = (userId: number) => {
-    console.log('Active user convo id', activeUserConvoId.value, userId);
+// const changeActiveConversation = (userId: number) => {
+//     console.log('Active user convo id', activeUserConvoId.value, userId);
 
-    if (activeUserConvoId.value === userId) {
-        activeUserConvoId.value = null;
-    } else {
-        activeUserConvoId.value = userId;
-    }
-    console.log('Active user convo id', activeUserConvoId.value, userId);
-};
+//     if (activeUserConvoId.value === userId) {
+//         activeUserConvoId.value = null;
+//     } else {
+//         activeUserConvoId.value = userId;
+//     }
+//     console.log('Active user convo id', activeUserConvoId.value, userId);
+// };
 
 const activateConversation = (userId: number) => {
     activeUserConvoId.value = userId;
@@ -85,13 +85,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div id="messaging-user-list" class="fixed bottom-10 right-5 z-10 cursor-pointer hover:cursor-pointer">
-        <div @click="showMessaging = !showMessaging">
-            <div v-if="!showMessaging">
-                <MessageCircle class="h-6 w-6" />
+    <div id="messaging-user-list" class="z-100 fixed bottom-10 right-5">
+        <div @click="showMessaging = !showMessaging" class="cursor-pointer">
+            <div v-if="!showMessaging" class="h-6 w-6 rounded-full bg-blue-500 shadow-lg">
+                <MessageCircle class="h-6 w-6 text-white" />
             </div>
         </div>
-        <div v-if="showMessaging">
+        <div v-if="showMessaging" class="rounded-lg bg-white shadow-lg">
             <h2 class="flex cursor-default rounded-lg border-2 border-blue-500 bg-blue-500 p-1 font-bold text-white">
                 Message
                 <span
@@ -100,7 +100,7 @@ onUnmounted(() => {
                     >X</span
                 >
             </h2>
-            <div id="messaging-user-rows" class="mt-1 grid gap-1">
+            <div id="messaging-user-rows" class="mt-1 grid max-h-[60vh] gap-1 overflow-y-auto">
                 <div v-for="user in users" :key="user.id" class="flex items-center justify-between rounded-lg bg-white shadow">
                     <div id="messaging-user-row" class="flex w-full items-center justify-between" q>
                         <h3 class="p-1 text-sm font-medium text-black">
@@ -138,3 +138,17 @@ onUnmounted(() => {
         </div>
     </div>
 </template>
+<style scoped>
+/* Add mobile-specific styles */
+@media (max-width: 640px) {
+    #messaging-user-list {
+        bottom: 1rem;
+        right: 1rem;
+        max-width: 90vw;
+    }
+
+    #messaging-user-rows {
+        max-height: 50vh;
+    }
+}
+</style>

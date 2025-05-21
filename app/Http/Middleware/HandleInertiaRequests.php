@@ -6,6 +6,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
+use Illuminate\Session\TokenMisMatchException;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -37,6 +38,8 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+
+
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
         // Get flash data from session
@@ -65,6 +68,35 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => $flash,
+            'csrf_token' => csrf_token(),
         ];
+    }
+    public function handle($request, \Closure $next)
+    {
+        \Log::info('REQUEST', [
+            'REQUEST_URL' => $request->url(),
+            'REQUEST_HOST' => $request->getHost(),
+            'REQUEST_SCHEME' => $request->getScheme(),
+            'REQUEST_PORT' => $request->getPort(),
+            'method' => $request->method(),
+            'headers' => $request->headers->all(),
+            'auth' => auth()->check(),
+            // 'session_id' => session()->getId(), // Add this
+            // 'session_domain' => config('session.domain'), // Add this
+            // 'session_secure' => config('session.secure'), // Add this
+            // 'session_same_site' => config('session.same_site'), // Add this
+            // // 'cookies' => $request->cookies->all(), // Add this
+
+
+        ]);
+
+        $response = parent::handle($request, $next);
+
+        \Log::info('RESPONSE', [
+            'status' => $response->status(),
+            'headers' => $response->headers->all(),
+        ]);
+
+        return $response;
     }
 }

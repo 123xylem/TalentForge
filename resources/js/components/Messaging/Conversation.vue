@@ -164,7 +164,7 @@ const closeConversation = () => {
                 </div>
             </div>
             <!-- Messages Area -->
-            <div v-if="isActive" ref="messageScroller" id="message-scroller" class="y-2 max-h-[87%] cursor-default overflow-scroll p-4">
+            <div v-if="isActive" ref="messageScroller" id="message-scroller" class="y-2 max-h-[87%] min-h-[250px] cursor-default overflow-scroll p-4">
                 <div v-for="message in messageStream" :key="message.id">
                     <div
                         class="message mt-2 rounded-lg p-2"

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { Notification } from '@/types';
 import { useForm, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
-
+import { computed, onMounted, ref } from 'vue';
 const notifications = ref<Notification[]>([]);
 const showNotifications = ref(false);
 
@@ -13,9 +12,14 @@ const unreadNotifications = computed(() => notifications.value.filter((notificat
 console.log(notifications.value, 'notifications');
 const form = useForm({
     notification_id: '',
+    _token: usePage().props.csrf_token,
 });
 
-//TODO add correct url for message request notification
+onMounted(() => {
+    console.log(new Date().toLocaleString(), 'DATE');
+    console.log(usePage().props, 'ALL PROPS');
+});
+
 const submitOne = (id: string) => {
     event?.preventDefault();
     form.notification_id = id;
@@ -27,7 +31,12 @@ const submitOne = (id: string) => {
 
     form.patch(route('notifications.markAsRead', id), {
         preserveScroll: true,
-        // Dont update Page as we want notifications to be updated without refresh
+        preserveState: true,
+        onSuccess: (res) => {
+            notifications.value = notifications.value.filter((n) => n.id !== id);
+            console.log(res, 'resPOOOOOOO');
+        },
+        // Dont update Page as we want notifications to be updated without refreshsss
         onError: (e) => {
             console.log(e, 'error');
         },
@@ -46,28 +55,71 @@ const submitAll = () => {
         },
     });
 };
-const connectionForm = useForm({});
+const connectionForm = useForm({
+    _token: usePage().props.csrf_token,
+});
 
 const handleConnectionRequest = async (id: string, url: string) => {
-    await form.patch(route('notifications.markAsRead', id), {
-        preserveScroll: true,
-        // Dont update Page as we want notifications to be updated without refresh
-        onError: (e) => {
-            console.log(e, 'error');
-        },
-        onSuccess: () => {
-            connectionForm.post(url, {
+    console.log('Starting handleConnectionRequest', { id, url });
+
+    // Create two separate forms for independent requests
+    const markReadForm = useForm({});
+    const connectionForm = useForm({});
+
+    try {
+        console.log('Making parallel requests...');
+
+        // Make both requests independently
+        const [markReadResponse, connectionResponse] = await Promise.all([
+            // Mark as read request
+            markReadForm.patch(route('notifications.markAsRead', id), {
                 preserveScroll: true,
-                preserveState: false,
-                onSuccess: (message) => {
-                    console.log(message, 'message');
+                preserveState: true,
+                onSuccess: (res) => {
+                    console.log('Mark as read success:', res);
                 },
                 onError: (e) => {
-                    console.log(e, 'error');
+                    console.error('Error marking as read:', e);
+                    console.log('Mark as read error details:', {
+                        status: e.response?.status,
+                        data: e.response?.data,
+                        headers: e.response?.headers,
+                    });
                 },
-            });
-        },
-    });
+            }),
+            // Connection request
+            connectionForm.post(url, {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: (res) => {
+                    console.log('Connection request success:', res);
+                },
+                onError: (e) => {
+                    console.error('Error handling connection:', e);
+                    console.log('Connection error details:', {
+                        status: e.response?.status,
+                        data: e.response?.data,
+                        headers: e.response?.headers,
+                    });
+                },
+            }),
+        ]);
+
+        console.log('Both requests completed:', {
+            markRead: markReadResponse,
+            connection: connectionResponse,
+        });
+
+        // Update UI after both requests complete
+        notifications.value = notifications.value.filter((n) => n.id !== id);
+    } catch (error) {
+        console.error('Error in handleConnectionRequest:', error);
+        console.log('Full error details:', {
+            message: error.message,
+            response: error.response,
+            status: error.response?.status,
+        });
+    }
 };
 
 const handleNotificationAction = (conversationId: string, senderId: string) => {
@@ -118,8 +170,14 @@ const handleNotificationAction = (conversationId: string, senderId: string) => {
                                 {{ notification.data.message }}
                                 <div v-if="notification.read_at === null" class="flex gap-2">
                                     <a
-                                        class="rounded-full bg-blue-500 px-2 py-1 text-xs text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
-                                        @click="handleConnectionRequest(notification.id, notification.data.url)"
+                                        class="touch-manipulation rounded-full bg-blue-500 px-3 py-2 text-xs text-white hover:bg-blue-600 active:bg-blue-700"
+                                        @click="
+                                            () => {
+                                                console.log('Button clicked');
+                                                handleConnectionRequest(notification.id, notification.data.url);
+                                            }
+                                        "
+                                        @touchstart.prevent
                                     >
                                         Accept
                                     </a>

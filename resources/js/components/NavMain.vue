@@ -8,8 +8,8 @@ defineProps<{
 }>();
 
 const page = usePage<SharedData>();
-const userType = page.props.auth.user.type === 'employer' ? 'Employer' : 'Job Seeker';
-const userName = page.props.auth.user.name;
+const userType = page.props?.auth?.user?.type === 'employer' ? 'Employer' : 'Job Seeker';
+const userName = page.props?.auth?.user?.name;
 </script>
 
 <template>
