@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
-import NotificationBell from '@/components/Listing/NotificationBell.vue';
+import NotificationBell from '@/components/Messaging/NotificationBell.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import type { BreadcrumbItemType } from '@/types';
 
@@ -17,8 +17,8 @@ defineProps<{
             <SidebarTrigger class="-ml-1" />
             <template v-if="breadcrumbs.length > 0">
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />
-                <NotificationBell />
             </template>
+            <NotificationBell />
         </div>
     </header>
 </template>
