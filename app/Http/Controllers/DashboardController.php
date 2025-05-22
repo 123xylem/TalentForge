@@ -28,7 +28,6 @@ class DashboardController extends Controller
         $filterParamCount = count($request->all()) > 0;
         $filterParams = $request->all();
 
-        Cache::flush();
         if ($employer) {
             if ($filterParamCount) {
                 $listings = Listing::filter($listingFilters)->where('user_id', $user)->with('skills', 'categories')->withCount('applicants')->latest()->paginate(6);

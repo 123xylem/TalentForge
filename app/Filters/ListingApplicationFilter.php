@@ -39,17 +39,15 @@ class ListingApplicationFilter extends QueryFilter
 
   public function textSearch($value)
   {
-    return $this->builder->where(function ($query) use ($value) {
-      $query->where('title', 'LIKE', '%' . $value . '%')
-        ->orWhere('description', 'LIKE', '%' . $value . '%');
+    $sanitizedValue = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    return $this->builder->where(function ($query) use ($sanitizedValue) {
+      $query->where('title', 'LIKE', '%' . $sanitizedValue . '%')
+        ->orWhere('description', 'LIKE', '%' . $sanitizedValue . '%');
     });
   }
 
   public function applicationStatus($value)
   {
-    // return $this->builder->whereHas('listingApplications', function ($query) use ($value) {
-    //   $query->where('status', $value);
-    // });
     return $this->builder->where('status', $value);
   }
 }

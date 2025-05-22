@@ -2,19 +2,18 @@
 import type { Notification } from '@/types';
 import { useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-
 const notifications = ref<Notification[]>([]);
 const showNotifications = ref(false);
 
 // Get notifications from auth user
-notifications.value = usePage().props.auth.user.notifications.data;
-// Use computed instead of watch
+notifications.value = (usePage().props.auth as any).user.notifications.data;
 const unreadNotifications = computed(() => notifications.value.filter((notification) => notification.read_at === null)) ?? {};
-console.log(notifications.value, 'notifications');
 const form = useForm({
     notification_id: '',
 });
 
+//TODO: deleteOne instead of markAsRead
+//TODO: markasRead once clicked by default
 const submitOne = (id: string) => {
     event?.preventDefault();
     form.notification_id = id;
@@ -26,9 +25,12 @@ const submitOne = (id: string) => {
 
     form.patch(route('notifications.markAsRead', id), {
         preserveScroll: true,
-        // Dont update Page as we want notifications to be updated without refresh
+        onSuccess: () => {
+            notifications.value = notifications.value.filter((n) => n.id !== id);
+        },
+        // Dont update Page as we want notifications to be updated without refreshsss
         onError: (e) => {
-            console.log(e, 'error');
+            console.error(e, 'error marking notification as read');
         },
     });
 };
@@ -44,6 +46,46 @@ const submitAll = () => {
             console.log(e, 'error');
         },
     });
+};
+
+const handleConnectionRequest = async (id: string, url: string, userId = '') => {
+    const form = useForm({
+        _token: usePage().props.csrf_token,
+    });
+
+    try {
+        await form.post(url, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: async () => {
+                // Remove notification from UI
+                notifications.value = notifications.value.filter((n) => n.id !== id);
+                submitOne(id);
+                window.dispatchEvent(
+                    new CustomEvent('activate-chat', {
+                        detail: { senderId: userId },
+                    }),
+                );
+                showNotifications.value = false;
+            },
+            onError: (errors) => {
+                console.error('Connection request failed:', errors);
+            },
+        });
+    } catch (error) {
+        console.error('Error in handleConnectionRequest:', error);
+    }
+};
+
+const handleNotificationAction = async (conversationId: string, senderId: string, notificationId: string) => {
+    showNotifications.value = false;
+    await window.dispatchEvent(
+        new CustomEvent('activate-chat', {
+            detail: { conversationId: conversationId, senderId: senderId },
+        }),
+    );
+    submitOne(notificationId);
+    showNotifications.value = false;
 };
 </script>
 <template>
@@ -80,9 +122,38 @@ const submitAll = () => {
                         method="POST"
                     >
                         <div v-if="notification.data.message" class="text-sm text-gray-900">
-                            <a :href="notification.data.url">
+                            <div v-if="notification.data.connectionRequest">
                                 {{ notification.data.message }}
-                            </a>
+                                <div v-if="notification.read_at === null" class="flex gap-2">
+                                    <a
+                                        class="touch-manipulation rounded-full bg-blue-500 px-3 py-2 text-xs text-white hover:bg-blue-600 active:bg-blue-700"
+                                        @click="handleConnectionRequest(notification.id, notification.data.url, notification.data.user_id)"
+                                        @touchstart.prevent
+                                    >
+                                        Accept
+                                    </a>
+                                    <a
+                                        class="rounded-full bg-red-500 px-2 py-1 text-xs text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
+                                        @click="handleConnectionRequest(notification.id, notification.data.decline_url)"
+                                    >
+                                        Decline
+                                    </a>
+                                </div>
+                            </div>
+                            <div v-else-if="notification.data.open_message">
+                                <a
+                                    class="hover:cursor-pointer hover:underline"
+                                    href="#"
+                                    @click="handleNotificationAction(notification.data.conversationId, notification.data.user_id, notification.id)"
+                                >
+                                    {{ notification.data.message }}
+                                </a>
+                            </div>
+                            <div v-else>
+                                <a :href="notification.data.url">
+                                    {{ notification.data.message }}
+                                </a>
+                            </div>
                         </div>
                         <div v-else-if="notification.data.employerAction" class="text-sm text-gray-900">
                             <a :href="notification.data.url">

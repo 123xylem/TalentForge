@@ -4,10 +4,10 @@ import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import { LayoutGrid, User } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-
+import UserProfileList from './Messaging/List.vue';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -15,8 +15,6 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
 ];
-const user = usePage().props.user;
-
 const footerNavItems: NavItem[] = [
     {
         title: 'Edit Profile',
@@ -27,7 +25,7 @@ const footerNavItems: NavItem[] = [
 </script>
 
 <template>
-    <Sidebar collapsible="icon" state="collapsed" variant="inset">
+    <Sidebar collapsible="icon" state="collapsed" variant="inset" class="z-[100]">
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
@@ -47,5 +45,7 @@ const footerNavItems: NavItem[] = [
             <NavUser />
         </SidebarFooter>
     </Sidebar>
+    <UserProfileList />
+
     <slot />
 </template>

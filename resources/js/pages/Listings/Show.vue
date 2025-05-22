@@ -13,8 +13,6 @@ const { truncate } = useTextFormatter();
 const page = usePage<SharedData>();
 const { listing, isOwner, auth, userApplicationStatus = null, listingApplications = [] } = page.props;
 
-console.log(listing, 'listingClosed!!!!', typeof listing?.listingClosed);
-
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Listings',
@@ -30,7 +28,7 @@ const showConfirmationModal = ref(false);
 const isApplicationModalOpen = ref(false);
 const user = auth.user;
 const showApplications = isOwner && listingApplications?.length > 0;
-const status = ref(userApplicationStatus);
+const status = ref<typeof userApplicationStatus>(userApplicationStatus);
 
 //TODO: Delete listing
 // const deleteListing = () => {
@@ -58,11 +56,13 @@ const form = useForm({
     skills: [2, 3],
 });
 
+const updateApplicationStatus = (updatedStatus: string) => {
+    status.value = updatedStatus;
+};
+
 const updateListingStatus = () => {
     showConfirmationModal.value = false;
-    console.log('PRE', form.listingClosed, form.skills, form.categories);
     form.listingClosed = !listing?.listingClosed;
-    console.log('Post', form.listingClosed);
 
     form.put(route('listings.update', listing?.id), {
         preserveState: false,
@@ -80,15 +80,21 @@ const updateListingStatus = () => {
     <Head title="Listing" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <ConfirmationModal
-            :title="listingClosed ? 'Reopen Listing' : 'Close Listing'"
-            :description="listingClosed ? 'Are you sure you want to reopen this listing?' : 'Are you sure you want to close this listing?'"
+            :title="listing?.listingClosed ? 'Reopen Listing' : 'Close Listing'"
+            :description="listing?.listingClosed ? 'Are you sure you want to reopen this listing?' : 'Are you sure you want to close this listing?'"
             :confirmModal="showConfirmationModal"
-            :confirmModalText="listingClosed == true ? 'Reopen' : 'Close'"
+            :confirmModalText="listing?.listingClosed == true ? 'Reopen' : 'Close'"
             @confirm="updateListingStatus"
             @cancel="showConfirmationModal = false"
         />
 
-        <ListingApplicationModal ref="modalRef" :listing_id="listing?.id" :user="user" v-model:is-open="isApplicationModalOpen" />
+        <ListingApplicationModal
+            ref="modalRef"
+            :listing_id="listing?.id"
+            :user="user"
+            v-model:is-open="isApplicationModalOpen"
+            @update:status="updateApplicationStatus"
+        />
         <div class="grid h-full w-full justify-center gap-4 rounded-xl p-4" :class="!showApplications ? 'grid-cols-1' : 'grid-cols-2'">
             <!-- Job Listing Details -->
             <div class="flex flex-1 flex-col gap-4 rounded-lg p-2">
@@ -105,7 +111,7 @@ const updateListingStatus = () => {
                                     {{ isApplicationModalOpen ? 'Cancel' : 'Apply' }}
                                 </button>
                             </span>
-                            <StatusLabel v-if="userApplicationStatus" :status="userApplicationStatus" />
+                            <StatusLabel v-if="status" :status="status" />
                         </h1>
                         <p class="text-sm text-neutral-500">{{ listing?.description }}</p>
                         <p class="text-sm text-neutral-500">{{ listing?.salary }}</p>
@@ -157,7 +163,7 @@ const updateListingStatus = () => {
                     </div>
                 </div>
             </div>
-            <!-- Applications -->
+            <!-- //TODO: Applications for Listing Make new component  -->
             <div v-if="showApplications" class="order-last flex flex-1 flex-col gap-4 rounded-lg p-2">
                 <h2 class="text-lg font-semibold">Applications</h2>
                 <div class="space-y-4">

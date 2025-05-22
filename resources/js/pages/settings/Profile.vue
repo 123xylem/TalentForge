@@ -60,7 +60,7 @@ const updateDisplayedSkills = (event: Event) => {
         }
     }
 };
-console.log(user.cv, user.profile_image);
+
 const handleCvChange = (event: Event) => {
     cvChanged.value = true;
     const file = event.target?.files?.[0];

@@ -25,7 +25,7 @@ const { filters, computedFilters, resetFilters, applyFilters, onPageChange, upda
 const computedListings = computed(() => page.props.listings);
 const countData = computed(() => page.props.listings.total);
 
-console.log('LISTINGS:', computedListings.value);
+// console.log('LISTINGS:', computedListings.value);
 
 // Initialize filters from URL via composable on mount
 onMounted(initializeFiltersFromUrl);

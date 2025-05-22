@@ -6,6 +6,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
+use Illuminate\Session\TokenMisMatchException;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -37,6 +38,8 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+
+
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
         // Get flash data from session
@@ -65,6 +68,49 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => $flash,
+            'csrf_token' => csrf_token(),
         ];
+    }
+    public function handle($request, \Closure $next)
+    {
+        if ($request->method() != 'GET') {
+            \Log::info('Inertia Request', [
+                'REQUEST_URL' => $request->url(),
+                'REQUEST_HOST' => $request->getHost(),
+                'REQUEST_SCHEME' => $request->getScheme(),
+                'REQUEST_PORT' => $request->getPort(),
+                'method' => $request->method(),
+                'headers' => $request->headers->all(),
+                'auth' => auth()->check(),
+                'route' => $request->route() ? [
+                    'name' => $request->route()->getName(),
+                    'action' => $request->route()->getActionName(),
+                    'parameters' => $request->route()->parameters(),
+                ] : 'No route info',
+                'session' => session()->all()
+            ]);
+        }
+
+        try {
+            $response = parent::handle($request, $next);
+
+            if ($request->method() != 'GET') {
+                \Log::info('Inertia Response', [
+                    'status' => $response->status(),
+                    'headers' => $response->headers->all(),
+                    'content' => $response->getContent()
+                ]);
+            }
+
+            return $response;
+        } catch (\Exception $e) {
+            \Log::error('Inertia Error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'url' => $request->url(),
+                'method' => $request->method()
+            ]);
+            throw $e;
+        }
     }
 }

@@ -8,9 +8,9 @@ import { defineEmits, defineProps, onMounted, ref } from 'vue';
 // We can pass these filters from parent to pagination component so that it to can use the url params to filter the items
 
 defineProps<{
-    title: string;
+    title?: string;
     applicationFilter?: boolean;
-    filters: {
+    filters?: {
         textSearch: string;
         locationSearch: string;
         selectedCategories: string[];
