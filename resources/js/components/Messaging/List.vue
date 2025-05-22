@@ -6,28 +6,20 @@ import { onMounted, onUnmounted, ref } from 'vue';
 interface User {
     id: number;
     name: string;
-    // Add other user fields you need
 }
 
 const users = ref<User[]>([]);
 const isConnected = ref<Record<number, boolean>>({});
 const hasPendingRequest = ref<Record<number, boolean>>({});
 const showMessaging = ref(false);
-const currentUser = usePage().props.auth.user.id;
+const currentUser = (usePage().props.auth as { user: { id: number } }).user.id;
 
 const activeUserConvoId = ref<number | null>(null);
-onMounted(() => {
-    fetchUsersAndConnections();
-});
 
 const fetchUsersAndConnections = async () => {
+    //TODO: add cache to user list
     try {
-        fetch('/users', {
-            headers: {
-                'Cache-Control': 'no-cache',
-                Pragma: 'no-cache',
-            },
-        })
+        fetch('/users', {})
             .then((res) => res.json())
             .then((data) => {
                 users.value = data.users.data;
@@ -49,17 +41,6 @@ const sendConnectionRequest = (userId: number) => {
     });
 };
 
-// const changeActiveConversation = (userId: number) => {
-//     console.log('Active user convo id', activeUserConvoId.value, userId);
-
-//     if (activeUserConvoId.value === userId) {
-//         activeUserConvoId.value = null;
-//     } else {
-//         activeUserConvoId.value = userId;
-//     }
-//     console.log('Active user convo id', activeUserConvoId.value, userId);
-// };
-
 const activateConversation = (userId: number) => {
     activeUserConvoId.value = userId;
     showMessaging.value = true;
@@ -69,10 +50,17 @@ const deactivateConversation = () => {
     activeUserConvoId.value = null;
 };
 
+// Updates user connection status and opens a chat window.
 const handleChatActivation = (event: CustomEvent) => {
+    if (hasPendingRequest.value[event.detail.senderId]) {
+        hasPendingRequest.value[event.detail.senderId] = false;
+        isConnected.value[event.detail.senderId] = true;
+    }
     const userId = event.detail.senderId;
     activateConversation(userId);
 };
+
+//Listeners that can activate a chat window when requested from notifications.
 
 onMounted(async () => {
     await fetchUsersAndConnections();
@@ -85,9 +73,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div id="messaging-user-list" class="z-100 fixed bottom-10 right-5">
+    <div id="messaging-user-list" class="fixed bottom-20 right-10 z-50">
         <div @click="showMessaging = !showMessaging" class="cursor-pointer">
-            <div v-if="!showMessaging" class="h-6 w-6 rounded-full bg-blue-500 shadow-lg">
+            <div v-if="!showMessaging" class="h-6 w-6 rounded-full bg-black shadow-lg hover:cursor-pointer">
                 <MessageCircle class="h-6 w-6 text-white" />
             </div>
         </div>
@@ -139,7 +127,6 @@ onUnmounted(() => {
     </div>
 </template>
 <style scoped>
-/* Add mobile-specific styles */
 @media (max-width: 640px) {
     #messaging-user-list {
         bottom: 1rem;

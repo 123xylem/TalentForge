@@ -9,6 +9,7 @@ use App\Events\NewMessage;
 use App\Notifications\MessageRecieved;
 use App\Models\Conversation;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class MessageController extends Controller
 {

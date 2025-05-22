@@ -24,52 +24,34 @@ class ConnectionController extends Controller
         // Optional: Send notification to target user
         $targetUser = User::find($userId);
         $targetUser->notify(new ConnectionRequest(Auth::user()));
-        Log::info('Conn request from ' . Auth::user()->id . ' to ' . $userId);
 
         return back();
     }
 
     public function accept($userId)
     {
-        Log::info('Test log entry');
 
         try {
-            Log::channel('daily')->info('Starting connection accept', [
+            // Update both sides of the connection
+            User::find($userId)->connections()
+                ->updateExistingPivot(Auth::id(), ['is_accepted' => true]);
+
+            Auth::user()->connections()
+                ->updateExistingPivot($userId, ['is_accepted' => true]);
+
+            if (request()->header('X-Inertia')) {
+                return back()->with('success', 'Connection accepted');
+            }
+
+            return response()->json(['message' => 'Connection accepted']);
+        } catch (\Exception $e) {
+            Log::error('Error in accept connection', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'userId' => $userId,
                 'authId' => Auth::id()
             ]);
 
-            $connection = User::find($userId)->connections()
-                ->where('connected_user_id', Auth::user()->id)
-                ->first();
-
-            if (!$connection) {
-                Log::channel('daily')->error('Connection not found', [
-                    'userId' => $userId,
-                    'authId' => Auth::id()
-                ]);
-                return back()->with('error', 'Connection not found');
-            }
-
-            // Debug before updates
-            Log::channel('daily')->info('Before connection update', [
-                'userId' => $userId,
-                'authId' => Auth::id(),
-                'connection' => $connection->toArray()
-            ]);
-
-            $connection->update([
-                'is_accepted' => true
-            ]);
-
-            $connection->save();
-            return back()->with('success', 'Connection accepted');
-            // Rest of your code...
-        } catch (\Exception $e) {
-            Log::channel('daily')->error('Error in accept connection', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
             return back()->with('error', 'Error accepting connection');
         }
     }

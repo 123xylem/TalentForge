@@ -13,6 +13,7 @@ use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\MessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
@@ -23,7 +24,7 @@ Route::get('/', function () {
 })->name('home');
 
 
-Route::resource('listings', ListingController::class)->middleware(['auth', 'verified']);
+Route::resource('listings', ListingController::class);
 Route::resource('categories', CategoryController::class);
 Route::resource('skills', SkillController::class);
 
@@ -44,20 +45,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
 
     // Connections
-    Route::post('/connections/{user}', [ConnectionController::class, 'store']);
-    Route::post('/connections/{user}/accept', function ($user) {
-        \Log::error([
-            'auth' => Auth::check(),
-            'user' => Auth::user(),
-            'verified' => Auth::user()?->hasVerifiedEmail(),
-            'request' => request()->all(),
-            'headers' => request()->headers->all()
-        ]);
-
-
-        return [ConnectionController::class, 'accept']($user);
-    });
-    Route::post('/connections/{user}/decline', [ConnectionController::class, 'decline']);
+    Route::prefix('connections')
+        ->name('connections.')
+        ->controller(ConnectionController::class)
+        ->group(function () {
+            Route::post('/{user}', 'store')->name('store');
+            Route::post('/{user}/accept', 'accept')->name('accept');
+            Route::post('/{user}/decline', 'decline')->name('decline');
+        });
 
     // Conversations
     Route::get('/conversations', [ConversationController::class, 'getOrCreateOne'])
@@ -78,22 +73,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 });
 
-Route::options('{any}', function () {
-    return response('', 200)
-        ->header('Access-Control-Allow-Origin', '*')
-        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
-        ->header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, X-CSRF-TOKEN')
-        ->header('Access-Control-Allow-Credentials', 'true')
-        ->header('RANDOM_VALUE', 'RANDOM_VALUE');
-})->where('any', '.*');
-
-
 Route::get('/env-test', function () {
     return [
+        'all' => $_ENV,
         'app_url' => config('app.url'),
         'app_env' => config('app.env'),
         'direct_env' => config('app.url'),
         'base_url' => url('/'),
         'asset_url' => asset('/'),
     ];
-});
+})->middleware('auth')->name('env-test');

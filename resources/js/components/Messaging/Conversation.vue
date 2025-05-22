@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { Message } from '@/types';
 import { useForm } from '@inertiajs/vue3';
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { onUnmounted, ref, watch } from 'vue';
 
-// Props and State
 const props = defineProps({
     currentUser: { type: Number, required: true },
     isActive: { type: Boolean, required: true },
@@ -12,7 +11,6 @@ const props = defineProps({
 
 const emit = defineEmits(['activate', 'deactivate']);
 
-// Refs
 const messageStream = ref<Message[]>([]);
 const conversationId = ref(0);
 const conversationNames = ref<{ [key: number]: string }>({});
@@ -20,7 +18,6 @@ const message = ref('');
 const messageScroller = ref<HTMLDivElement | null>(null);
 let currentChannel: any = null;
 
-// Form Setup
 const messageForm = useForm({
     user_id: props.currentUser,
     content: '',
@@ -28,18 +25,10 @@ const messageForm = useForm({
     created_at: new Date().toISOString(),
 });
 
-// Lifecycle Hooks
-onMounted(async () => {
-    if (props.isActive) {
-        toggleExpand();
-    }
-});
-
 onUnmounted(() => {
     cleanupChannel();
 });
 
-// Watchers
 watch(
     () => props.isActive,
     (newValue) => {
@@ -53,13 +42,7 @@ watch(conversationId, async (newId) => {
     if (newId) {
         subscribeToChannel(newId);
         fetchConvoMessages(newId);
-        if (messageScroller.value) {
-            setTimeout(() => {
-                if (messageScroller.value) {
-                    messageScroller.value.scrollTop = messageScroller.value.scrollHeight;
-                }
-            }, 140);
-        }
+        scrollToBottom();
     }
 });
 
@@ -68,30 +51,46 @@ const sendMessage = () => {
     messageForm.content = message.value;
     messageForm.conversation_id = conversationId.value;
     messageStream.value = [...messageStream.value, messageForm.data() as Message];
+    scrollToBottom();
+
     messageForm.post(route('messages.store'), {
         onSuccess: () => {
             messageForm.reset();
             message.value = '';
         },
         onError: (error) => {
-            console.log(error, 'Error sending message');
+            console.error(error, 'Error sending message');
         },
     });
+};
+
+const scrollToBottom = () => {
+    if (messageScroller.value) {
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                if (messageScroller.value) {
+                    messageScroller.value.scrollTop = messageScroller.value.scrollHeight;
+                }
+            });
+        }, 180);
+    }
 };
 
 // Channel Management
 const cleanupChannel = () => {
     if (currentChannel) {
-        currentChannel.unsubscribe();
+        window.Echo.leave(`conversation.${conversationId.value}`);
         currentChannel = null;
     }
 };
 
 const subscribeToChannel = (newId: number) => {
     currentChannel = window.Echo.private(`conversation.${newId}`);
+
     currentChannel.listen('.new-message', function (data: Message) {
         if (data.user_id !== props.currentUser) {
             messageStream.value = [...messageStream.value, data];
+            scrollToBottom();
         }
     });
 };
@@ -121,10 +120,9 @@ const getOrCreateConversation = async () => {
     const data = await response.json();
     conversationId.value = Number(data.conversation_id);
     conversationNames.value = data.names;
-    emit('activate');
 };
 
-// Data Fetching
+//FetchMessages
 const fetchConvoMessages = async (newId: number) => {
     await fetch(route('messages.index', { conversation_id: newId }), {
         method: 'GET',
@@ -148,13 +146,11 @@ const closeConversation = () => {
         <!-- Chat Button/Modal -->
         <div
             class="overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300 ease-in-out"
-            :class="isActive ? 'z-100 fixed bottom-1 right-0 top-1 h-[100%] w-full max-w-[300px]' : 'z-10'"
+            :class="isActive ? 'z-100 fixed bottom-0 right-0 top-0 flex w-full max-w-[300px] flex-col' : 'z-10'"
+            :style="isActive ? { height: '100dvh' } : {}"
         >
             <!-- Header -->
-            <div
-                v-if="isActive"
-                class="absolute left-0 right-0 top-0 z-10 flex cursor-pointer items-center justify-between bg-blue-500 p-2 text-black"
-            >
+            <div v-if="isActive" class="flex flex-none cursor-pointer items-center justify-between bg-blue-500 p-2 text-black">
                 <span class="text-white">{{ recipient.name }}</span>
                 <div
                     @click="closeConversation"
@@ -164,7 +160,7 @@ const closeConversation = () => {
                 </div>
             </div>
             <!-- Messages Area -->
-            <div v-if="isActive" ref="messageScroller" id="message-scroller" class="y-2 max-h-[87%] min-h-[250px] cursor-default overflow-scroll p-4">
+            <div v-if="isActive" ref="messageScroller" id="message-scroller" class="flex-1 overflow-y-auto p-4">
                 <div v-for="message in messageStream" :key="message.id">
                     <div
                         class="message mt-2 rounded-lg p-2"
@@ -185,7 +181,7 @@ const closeConversation = () => {
             </div>
 
             <!-- Input Area -->
-            <div v-if="isActive" class="border-t p-2">
+            <div v-if="isActive" class="flex-none border-t p-2">
                 <form @submit.prevent="sendMessage" class="flex gap-2">
                     <input
                         type="text"

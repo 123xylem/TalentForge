@@ -10,7 +10,7 @@ use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Inertia;
-
+use App\Http\Middleware\DebugRouteMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+            // DebugRouteMiddleware::class, ENABLE FOR ROUTE DEBUGGING
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

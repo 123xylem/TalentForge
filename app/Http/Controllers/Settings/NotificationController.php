@@ -22,18 +22,10 @@ class NotificationController extends Controller
     public function markAsRead(Request $request)
     {
         try {
-            Log::info('Request details', [
-                'middleware' => $request->route()->middleware(),
-                'auth' => Auth::check(),
-                'user' => Auth::user()?->id,
-                'headers' => $request->headers->all(),
-                'method' => $request->method()
-            ]);
             $notification_id = $request->notification_id ?? $request->route('notification');
             $user = $request->user();
             $user->unreadNotifications->where('id', $notification_id)->markAsRead();
-
-            return Inertia::location(url()->previous());
+            return back();
         } catch (\Exception $e) {
             Log::error('Failed to mark notification as read', [
                 'error' => $e->getMessage(),

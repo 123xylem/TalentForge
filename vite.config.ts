@@ -12,7 +12,6 @@ export default defineConfig({
             input: ['resources/js/app.ts'],
             ssr: 'resources/js/ssr.ts',
             refresh: true,
-            url: 'http://192.168.1.102:8000',
         }),
         vue({
             template: {
@@ -34,22 +33,13 @@ export default defineConfig({
             plugins: [tailwindcss, autoprefixer],
         },
     },
-    // server: {
-    //     host: true, // This allows external connections
-    //     // origin: 'http://192.168.1.102:8000',
-
-    //     hmr: {
-    //         host: '192.168.1.102', // Your machine's local IP address
-    //     },
-    // },
-
     server: {
         host: '0.0.0.0',
         hmr: {
-            host: '0.0.0.0',
+            host: '192.168.1.102',
+            protocol: 'ws',
+            clientPort: 5173,
+            port: 5173,
         },
-        port: 5173,
-        strictPort: true,
-        origin: 'http://192.168.1.102:8000', // Your local IP
     },
 });
