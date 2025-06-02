@@ -87,6 +87,18 @@ const handleNotificationAction = async (conversationId: string, senderId: string
     submitOne(notificationId);
     showNotifications.value = false;
 };
+
+const hideReadNotifications = ref(false);
+const visibleNotifications = computed(() => {
+    if (hideReadNotifications.value) {
+        return notifications.value.filter((notification) => notification.read_at === null);
+    }
+    return notifications.value;
+});
+
+const toggleHideReadNotifications = () => {
+    hideReadNotifications.value = !hideReadNotifications.value;
+};
 </script>
 <template>
     <div class="relative ml-auto">
@@ -107,15 +119,24 @@ const handleNotificationAction = async (conversationId: string, senderId: string
         <!-- Dropdown -->
         <div v-if="showNotifications && notifications.length > 0" class="absolute right-0 z-50 mt-2 w-80 rounded-md bg-white shadow-lg">
             <div class="py-1">
-                <form @submit.prevent="submitAll" method="POST" class="absolute right-2 top-2 w-fit">
-                    <input
-                        type="submit"
+                <div class="flex items-center justify-between gap-2 px-2">
+                    <div class="mr-auto px-4 py-2 text-left text-gray-500"><a href="/notifications">View All</a></div>
+                    <button
+                        @click="toggleHideReadNotifications"
                         class="ml-auto rounded-full bg-red-500 px-2 py-1 text-xs text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
-                        value="Read All"
-                    />
-                </form>
-                <div class="px-4 py-2 text-left text-gray-500"><a href="/notifications">View All</a></div>
-                <div v-for="notification in notifications" :key="notification.id" class="p">
+                    >
+                        {{ hideReadNotifications ? 'Show Read' : 'Hide Read' }}
+                    </button>
+
+                    <form @submit.prevent="submitAll" method="POST" class="w-fit">
+                        <input
+                            type="submit"
+                            class="ml-auto rounded-full bg-red-500 px-2 py-1 text-xs text-neutral-500 text-white hover:cursor-pointer hover:bg-blue-600"
+                            value="Read All"
+                        />
+                    </form>
+                </div>
+                <div v-for="notification in visibleNotifications" :key="notification.id" class="p">
                     <form
                         class="flex flex-wrap items-center gap-2 px-4 py-2 text-gray-900 hover:cursor-pointer"
                         :class="{ 'bg-gray-100': notification.read_at === null }"
