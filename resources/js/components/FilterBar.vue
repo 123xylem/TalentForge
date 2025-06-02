@@ -20,7 +20,6 @@ defineProps<{
     };
 }>();
 
-//TODO: Finalise styles
 // TODO: Salary type filter needs work
 const skillsList = ref<Skill[]>([]);
 const categoriesList = ref<Category[]>([]);
@@ -161,151 +160,171 @@ onMounted(() => {
 //TODO add elastic search autocomplete?
 </script>
 <template>
-    <div class="flex flex-wrap items-center gap-2 py-4">
-        <span class="mr-4 text-lg font-semibold">{{ title }}</span>
-        <div class="flex gap-2">
-            <form class="flex flex-wrap items-center gap-2 rounded-lg bg-white px-3 py-2 shadow" @submit.prevent="buildFiltersAndApply">
-                <input
-                    placeholder="Search"
-                    class="rounded-full border border-gray-300 bg-white px-3 py-1 text-sm text-gray-800 focus:border-blue-500 focus:outline-none"
-                    v-model="formTextSearch"
-                    @input="$emit('update:textSearch', formTextSearch)"
-                    style="min-width: 120px"
-                />
-                <input
-                    placeholder="Location"
-                    class="rounded-full border border-gray-300 bg-white px-3 py-1 text-sm text-gray-800 focus:border-blue-500 focus:outline-none"
-                    v-model="formLocationSearch"
-                    @input="$emit('update:locationSearch', formLocationSearch)"
-                    style="min-width: 120px"
-                />
+    <div class="flex flex-col gap-4 py-4">
+        <span v-if="title" class="text-lg font-semibold">{{ title }}</span>
+        <form class="flex flex-col gap-4 rounded-lg bg-card p-4 shadow" @submit.prevent="buildFiltersAndApply">
+            <!-- Search Inputs -->
+            <div class="flex flex-col gap-4 sm:flex-row">
+                <div class="flex-1">
+                    <input
+                        placeholder="Search"
+                        class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        v-model="formTextSearch"
+                        @input="$emit('update:textSearch', formTextSearch)"
+                    />
+                </div>
+                <div class="flex-1">
+                    <input
+                        placeholder="Location"
+                        class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        v-model="formLocationSearch"
+                        @input="$emit('update:locationSearch', formLocationSearch)"
+                    />
+                </div>
+            </div>
+
+            <!-- Filters Row -->
+            <div class="flex flex-wrap gap-4">
                 <!-- Category Dropdown -->
-                <div class="relative">
+                <div class="relative min-w-[200px] flex-1">
                     <button
                         type="button"
-                        class="rounded-full border border-gray-300 bg-white px-3 py-1 text-sm text-gray-800 hover:border-blue-600 focus:outline-none"
+                        class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         @click="(getCategories(), closeDropsExcept('categories'))"
                     >
-                        Category ▼
+                        <span>Category</span>
+                        <span class="ml-2">▼</span>
                     </button>
                     <div
                         v-if="openDropdowns.categories && dropdownsOpen"
-                        class="absolute z-10 mt-2 flex max-w-[300px] flex-row flex-wrap rounded-md bg-white p-2 shadow-lg"
+                        class="absolute z-10 mt-2 w-full rounded-md border bg-popover p-2 shadow-md"
                     >
-                        <label
-                            v-for="category in categoriesList"
-                            :key="category.id"
-                            class="flex min-w-[120px] items-center px-3 py-1 hover:bg-gray-100"
-                        >
-                            <input
-                                type="radio"
-                                :value="category.id"
-                                class="mr-2"
-                                :checked="formSelectedCategory === category.id"
-                                @change="(updateCategory(category.id), $emit('update:category', category.id))"
-                            />
-                            <span class="text-sm text-gray-800">{{ category.name }}</span>
-                        </label>
-                    </div>
-                </div>
-                <!-- Skills Dropdown -->
-                <div class="relative">
-                    <button
-                        type="button"
-                        class="rounded-full border border-gray-300 bg-white px-3 py-1 text-sm text-gray-800 hover:border-blue-600 focus:outline-none"
-                        @click.stop="(getSkills(), closeDropsExcept('skills'))"
-                    >
-                        Skills ▼
-                    </button>
-                    <div
-                        v-if="openDropdowns.skills && dropdownsOpen"
-                        class="absolute left-[-150px] z-10 mt-2 grid w-[450px] grid-cols-3 gap-2 rounded-md bg-white p-2 shadow-lg"
-                    >
-                        <label v-for="skill in skillsList" :key="skill.id" class="flex items-center px-3 py-1 hover:bg-gray-100">
-                            <input
-                                type="checkbox"
-                                :value="skill.id"
-                                @change="(updateSkills(skill.id), $emit('update:skills', skill.id))"
-                                class="mr-2"
-                                :checked="formSelectedSkills.includes(skill.id)"
-                            />
-                            <span class="text-sm text-gray-800">{{ skill.name }}</span>
-                        </label>
-                    </div>
-                </div>
-                <!-- Salary Dropdown -->
-                <div class="relative">
-                    <button
-                        type="button"
-                        class="rounded-full border border-gray-300 bg-white px-3 py-1 text-sm text-gray-800 hover:border-blue-600 focus:outline-none"
-                        @click="closeDropsExcept('salary')"
-                    >
-                        Salary ▼
-                    </button>
-                    <div
-                        v-if="openDropdowns.salary && dropdownsOpen"
-                        class="absolute z-10 mt-2 flex max-w-[350px] flex-row flex-wrap rounded-md bg-white p-2 shadow-lg"
-                    >
-                        <div class="flex flex-row flex-wrap gap-x-2 gap-y-1 py-1">
-                            <label v-for="salary in salaryOptions" :key="salary" class="flex min-w-[120px] items-center px-3 py-1 hover:bg-gray-100">
-                                <input
-                                    type="radio"
-                                    :id="salary"
-                                    @change="(updateSalary(salary), $emit('update:salary', salary === 'Any' ? '' : salary))"
-                                    :value="salary"
-                                    :checked="salary === formSelectedSalary"
-                                />
-                                <span class="ml-2 text-sm text-gray-800">
-                                    {{ salary == 'Any' ? 'Any' : '£' + salary + ' +' }}
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <!-- Application Status Dropdown -->
-                <div v-if="applicationFilter" class="relative">
-                    <button
-                        type="button"
-                        class="rounded-full border border-gray-300 bg-white px-3 py-1 text-sm text-gray-800 hover:border-blue-600 focus:outline-none"
-                        @click="closeDropsExcept('applicationStatus')"
-                    >
-                        Status ▼
-                    </button>
-                    <div
-                        v-if="openDropdowns.applicationStatus && dropdownsOpen"
-                        class="absolute z-10 mt-2 flex max-w-[350px] flex-row flex-wrap rounded-md bg-white p-2 shadow-lg"
-                    >
-                        <div class="flex flex-row flex-wrap gap-x-2 gap-y-1 py-1">
+                        <div class="max-h-[200px] overflow-y-auto">
                             <label
-                                v-for="status in applicationStatusOptions"
-                                :key="status"
-                                class="flex min-w-[120px] items-center px-3 py-1 hover:bg-gray-100"
+                                v-for="category in categoriesList"
+                                :key="category.id"
+                                class="flex items-center px-3 py-2 hover:bg-accent hover:text-accent-foreground"
                             >
                                 <input
                                     type="radio"
-                                    :id="status"
-                                    :value="status"
-                                    :checked="status === formSelectedApplicationStatus"
-                                    @change="
-                                        (updateApplicationStatus(status),
-                                        $emit('update:applicationStatus', status === 'Any' ? '' : status.toLowerCase()))
-                                    "
+                                    :value="category.id"
+                                    class="mr-2"
+                                    :checked="formSelectedCategory === category.id"
+                                    @change="(updateCategory(category.id), $emit('update:category', category.id))"
                                 />
-                                <span class="ml-2 text-sm text-gray-800">{{ status }}</span>
+                                <span class="text-sm">{{ category.name }}</span>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="rounded-full bg-blue-600 px-4 py-1 text-sm font-medium text-white hover:bg-blue-700">Search</button>
+                <!-- Skills Dropdown -->
+                <div class="relative min-w-[200px] flex-1">
+                    <button
+                        type="button"
+                        class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        @click="(getSkills(), closeDropsExcept('skills'))"
+                    >
+                        <span>Skills</span>
+                        <span class="ml-2">▼</span>
+                    </button>
+                    <div v-if="openDropdowns.skills && dropdownsOpen" class="absolute z-10 mt-2 w-full rounded-md border bg-popover p-2 shadow-md">
+                        <div class="max-h-[200px] overflow-y-auto">
+                            <label
+                                v-for="skill in skillsList"
+                                :key="skill.id"
+                                class="flex items-center px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                            >
+                                <input
+                                    type="checkbox"
+                                    :value="skill.id"
+                                    class="mr-2"
+                                    :checked="formSelectedSkills.includes(skill.id)"
+                                    @change="updateSkills(skill.id)"
+                                />
+                                <span class="text-sm">{{ skill.name }}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salary Dropdown -->
+                <div class="relative min-w-[200px] flex-1">
+                    <button
+                        type="button"
+                        class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        @click="closeDropsExcept('salary')"
+                    >
+                        <span>Salary</span>
+                        <span class="ml-2">▼</span>
+                    </button>
+                    <div v-if="openDropdowns.salary && dropdownsOpen" class="absolute z-10 mt-2 w-full rounded-md border bg-popover p-2 shadow-md">
+                        <div class="max-h-[200px] overflow-y-auto">
+                            <label
+                                v-for="salary in salaryOptions"
+                                :key="salary"
+                                class="flex items-center px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                            >
+                                <input
+                                    type="radio"
+                                    :value="salary"
+                                    class="mr-2"
+                                    :checked="formSelectedSalary === salary"
+                                    @change="((formSelectedSalary = salary), $emit('update:salary', salary))"
+                                />
+                                <span class="text-sm">{{ salary }}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Status Dropdown -->
+                <div v-if="applicationFilter" class="relative min-w-[200px] flex-1">
+                    <button
+                        type="button"
+                        class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        @click="closeDropsExcept('applicationStatus')"
+                    >
+                        <span>Status</span>
+                        <span class="ml-2">▼</span>
+                    </button>
+                    <div
+                        v-if="openDropdowns.applicationStatus && dropdownsOpen"
+                        class="absolute z-10 mt-2 w-full rounded-md border bg-popover p-2 shadow-md"
+                    >
+                        <div class="max-h-[200px] overflow-y-auto">
+                            <label
+                                v-for="status in applicationStatusOptions"
+                                :key="status"
+                                class="flex items-center px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                            >
+                                <input
+                                    type="radio"
+                                    :value="status"
+                                    class="mr-2"
+                                    :checked="formSelectedApplicationStatus === status"
+                                    @change="((formSelectedApplicationStatus = status), $emit('update:applicationStatus', status))"
+                                />
+                                <span class="text-sm">{{ status }}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-4">
+                <button type="submit" class="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                    Search
+                </button>
                 <button
                     type="button"
                     @click="resetFilters"
-                    class="rounded-full bg-gray-200 px-4 py-1 text-sm font-medium text-gray-700 hover:bg-gray-300"
+                    class="flex-1 rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/90"
                 >
                     Reset
                 </button>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </template>

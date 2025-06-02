@@ -44,7 +44,6 @@ onMounted(initializeFiltersFromUrl);
                 <span class="text-sm text-neutral-500" v-else>No listings found</span>
             </h1>
             <FilterBar
-                title="Your Listings"
                 v-bind="filters.value"
                 @update:textSearch="updateFilter('textSearch', $event)"
                 @update:locationSearch="updateFilter('locationSearch', $event)"
@@ -62,11 +61,11 @@ onMounted(initializeFiltersFromUrl);
         <div v-else class="flex flex-col gap-4 rounded-xl p-4">
             <h1 class="text-2xl font-semibold">No listings found</h1>
         </div>
-        <Pagination v-if="computedListings" :links="computedListings.links" :filters="computedFilters" @pageChange="onPageChange" />
-
-        <div class="listings-buttons flex gap-4">
-            <Link v-if="isEmployer" :href="route('listings.create')" class="btn btn-primary">Create Listing</Link>
-            <Link :href="route('listings.index')" class="btn btn-secondary">All listings</Link>
+        <div class="listings-buttons m-auto flex items-center gap-4">
+            <Link v-if="isEmployer" :href="route('listings.create')" class="btn-primary rounded-lg px-4 py-2">Create Listing</Link>
+            <Link :href="route('listings.index')" class="btn-secondary rounded-lg px-4 py-2">All listings</Link>
         </div>
+
+        <Pagination class="mt-4" v-if="computedListings" :links="computedListings.links" :filters="computedFilters" @pageChange="onPageChange" />
     </AppLayout>
 </template>

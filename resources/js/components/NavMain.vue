@@ -14,12 +14,17 @@ const userName = page.props?.auth?.user?.name;
 
 <template>
     <SidebarGroup class="px-2 py-0">
-        <SidebarGroupLabel>Hi {{ userName }} - {{ userType }}</SidebarGroupLabel>
+        <SidebarGroupLabel class="mb-2 text-sm font-medium text-sidebar-foreground/80"> Hi {{ userName }} - {{ userType }} </SidebarGroupLabel>
         <SidebarMenu>
             <SidebarMenuItem v-for="item in items" :key="item.title">
-                <SidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title">
-                    <Link :href="item.href">
-                        <component :is="item.icon" />
+                <SidebarMenuButton
+                    as-child
+                    :is-active="item.href === page.url"
+                    :tooltip="item.title"
+                    class="text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                >
+                    <Link :href="item.href" class="flex items-center gap-2">
+                        <component :is="item.icon" class="h-5 w-5" />
                         <span>{{ item.title }}</span>
                     </Link>
                 </SidebarMenuButton>
