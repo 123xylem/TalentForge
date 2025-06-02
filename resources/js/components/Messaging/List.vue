@@ -88,8 +88,8 @@ onUnmounted(() => {
 <template>
     <div id="messaging-user-list" class="fixed bottom-20 right-10 z-50">
         <div @click="showMessaging = !showMessaging" class="cursor-pointer">
-            <div v-if="!showMessaging" class="h-6 w-6 rounded-full bg-accent shadow-lg hover:bg-accent/90">
-                <MessageCircle class="h-6 w-6 text-accent-foreground" />
+            <div v-if="!showMessaging" class="rounded-full shadow-[0_0_18px_rgba(255,255,255,0.25)] shadow-lg hover:bg-accent/90">
+                <MessageCircle class="h-8 w-8" />
             </div>
         </div>
         <div v-if="showMessaging" class="rounded-lg border border-border bg-background shadow-lg">
