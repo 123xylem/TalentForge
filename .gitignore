@@ -24,3 +24,5 @@ yarn-error.log
 /.zed
 TalentForge.code-workspace
 TODO.txt
+..bfg-report*
+bfg.*
