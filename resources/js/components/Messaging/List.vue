@@ -1,8 +1,14 @@
 <script setup lang="ts">
 import Conversation from '@/components/Messaging/Conversation.vue';
-import { usePage } from '@inertiajs/vue3';
+import { useCsrf } from '@/composables/useCsrf';
+import { useTextFormatter } from '@/composables/useTextFormatter';
+import { useForm, usePage } from '@inertiajs/vue3';
 import { MessageCircle } from 'lucide-vue-next';
 import { onMounted, onUnmounted, ref } from 'vue';
+
+const { truncate } = useTextFormatter();
+const { csrf } = useCsrf();
+
 interface User {
     id: number;
     name: string;
@@ -15,6 +21,13 @@ const showMessaging = ref(false);
 const currentUser = (usePage().props.auth as { user: { id: number } }).user.id;
 
 const activeUserConvoId = ref<number | null>(null);
+
+const form = useForm({
+    _method: 'POST',
+    headers: {
+        'X-CSRF-TOKEN': csrf.value || '',
+    },
+});
 
 const fetchUsersAndConnections = async () => {
     //TODO: add cache to user list
@@ -36,7 +49,7 @@ const sendConnectionRequest = (userId: number) => {
     fetch(`/connections/${userId}`, {
         method: 'POST',
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            'X-CSRF-TOKEN': csrf.value || '',
         },
     });
 };
@@ -75,38 +88,42 @@ onUnmounted(() => {
 <template>
     <div id="messaging-user-list" class="fixed bottom-20 right-10 z-50">
         <div @click="showMessaging = !showMessaging" class="cursor-pointer">
-            <div v-if="!showMessaging" class="h-6 w-6 rounded-full bg-black shadow-lg hover:cursor-pointer">
-                <MessageCircle class="h-6 w-6 text-white" />
+            <div v-if="!showMessaging" class="h-6 w-6 rounded-full bg-accent shadow-lg hover:bg-accent/90">
+                <MessageCircle class="h-6 w-6 text-accent-foreground" />
             </div>
         </div>
-        <div v-if="showMessaging" class="rounded-lg bg-white shadow-lg">
-            <h2 class="flex cursor-default rounded-lg border-2 border-blue-500 bg-blue-500 p-1 font-bold text-white">
+        <div v-if="showMessaging" class="rounded-lg border border-border bg-background shadow-lg">
+            <h2 class="flex cursor-default rounded-t-lg border-b border-border bg-accent p-2 font-bold text-accent-foreground">
                 Message
                 <span
                     @click="showMessaging = !showMessaging"
-                    class="ml-auto flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white"
+                    class="ml-auto flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground"
                     >X</span
                 >
             </h2>
-            <div id="messaging-user-rows" class="mt-1 grid max-h-[60vh] gap-1 overflow-y-auto">
-                <div v-for="user in users" :key="user.id" class="flex items-center justify-between rounded-lg bg-white shadow">
-                    <div id="messaging-user-row" class="flex w-full items-center justify-between" q>
-                        <h3 class="p-1 text-sm font-medium text-black">
-                            {{ user.name }}
+            <div id="messaging-user-rows" class="mt-2 grid max-h-[60vh] gap-2 overflow-y-auto p-2">
+                <div
+                    v-for="user in users"
+                    :key="user.id"
+                    class="flex items-center justify-between rounded-lg border border-border bg-background p-2 shadow-sm"
+                >
+                    <div id="messaging-user-row" class="flex w-full items-center justify-between">
+                        <h3 class="text-sm font-medium text-foreground">
+                            {{ truncate(user.name, 10) }}
                         </h3>
 
                         <button
                             v-if="!isConnected[user.id] && !hasPendingRequest[user.id]"
                             @click="sendConnectionRequest(user.id)"
-                            class="m-1 ml-auto rounded bg-blue-500 p-1 text-sm text-white hover:bg-blue-600"
+                            class="ml-2 rounded bg-accent px-2 py-1 text-sm text-accent-foreground hover:bg-accent/90"
                         >
                             Connect
                         </button>
-                        <span v-else-if="hasPendingRequest[user.id]" class="ml-auto p-1 text-gray-500"> Request Pending </span>
+                        <span v-else-if="hasPendingRequest[user.id]" class="ml-auto text-sm text-muted-foreground"> Request Pending </span>
                         <button
                             v-else
                             @click="activateConversation(user.id)"
-                            class="m-1 ml-auto rounded bg-blue-500 p-1 text-sm text-white hover:bg-blue-600"
+                            class="ml-auto rounded bg-accent px-2 py-1 text-sm text-accent-foreground hover:bg-accent/90"
                             :id="`chat-button-${user.id}`"
                         >
                             Chat!
@@ -136,6 +153,7 @@ onUnmounted(() => {
 
     #messaging-user-rows {
         max-height: 50vh;
+        min-width: 170px;
     }
 }
 </style>

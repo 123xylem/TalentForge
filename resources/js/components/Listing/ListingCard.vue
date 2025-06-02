@@ -20,34 +20,50 @@ const listingData = computed(() => (props.listing.listing?.id ? props.listing.li
 </script>
 
 <template>
-    <div class="relative flex h-full flex-1 flex-col gap-2 rounded-lg border p-4 hover:cursor-pointer hover:bg-gray-900">
+    <div class="relative flex h-full flex-1 flex-col gap-2 rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-accent/5">
         <Link :href="route('listings.show', listingData.id)" class="block">
-            <div v-if="applicants > 0" class="absolute right-4 top-4 flex flex-row gap-2">
-                <UserRoundIcon class="h-4 w-4 text-neutral-500" />
-                <span class="text-xs text-neutral-500"> {{ applicants }} </span>
-            </div>
-            <h2 class="text-lg font-semibold">
-                {{ listingData.title }}
-            </h2>
-            <p v-if="listing.status" class="absolute right-4 top-4 text-xs text-neutral-500">
-                <StatusLabel :status="listing.status" />
-            </p>
-
-            <div v-if="listingData.skills" class="flex flex-row gap-2">
-                <div
-                    v-for="skill in listingData.skills?.slice(0, 3)"
-                    :key="skill.id"
-                    class="rounded-full bg-gray-700 px-2 py-1 text-xs text-neutral-500"
-                >
-                    {{ skill.name }}
+            <div class="flex flex-col gap-3">
+                <!-- Header with title and status -->
+                <div class="flex items-start justify-between gap-4">
+                    <h2 class="line-clamp-2 text-lg font-semibold text-foreground">
+                        {{ listingData.title }}
+                    </h2>
+                    <div class="flex shrink-0 items-center gap-2">
+                        <div v-if="applicants > 0" class="flex items-center gap-1">
+                            <UserRoundIcon class="h-4 w-4 text-muted-foreground" />
+                            <span class="text-xs text-muted-foreground">{{ applicants }}</span>
+                        </div>
+                        <p v-if="listing.status" class="text-xs">
+                            <StatusLabel :status="listing.status" />
+                        </p>
+                    </div>
                 </div>
+
+                <!-- Skills -->
+                <div v-if="listingData.skills" class="flex flex-wrap gap-2">
+                    <div
+                        v-for="skill in listingData.skills?.slice(0, 3)"
+                        :key="skill.id"
+                        class="rounded-full bg-accent/10 px-2 py-1 text-xs text-accent-foreground"
+                    >
+                        {{ skill.name }}
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <p class="line-clamp-2 text-sm text-muted-foreground">
+                    {{ truncate(listingData.description, 100) }}
+                </p>
+
+                <!-- Details -->
+                <div class="flex flex-col gap-1 text-sm text-muted-foreground">
+                    <p>{{ listingData.salary }}</p>
+                    <p>{{ listingData.location }}</p>
+                </div>
+
+                <!-- Footer -->
+                <p class="mt-2 text-xs text-muted-foreground">Created: {{ new Date(listing.created_at ?? '').toLocaleDateString() }}</p>
             </div>
-            <p class="text-sm text-neutral-500">
-                {{ truncate(listingData.description, 100) }}
-            </p>
-            <p class="text-sm text-neutral-500">{{ listingData.salary }}</p>
-            <p class="text-sm text-neutral-500">{{ listingData.location }}</p>
-            <p class="mt-2 text-xs text-neutral-500">Created: {{ new Date(listing.created_at ?? '').toLocaleDateString() }}</p>
         </Link>
     </div>
 </template>

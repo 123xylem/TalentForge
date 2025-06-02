@@ -145,54 +145,54 @@ const closeConversation = () => {
     <div class="" id="messaging-container" :data-user-id="recipient.id">
         <!-- Chat Button/Modal -->
         <div
-            class="overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300 ease-in-out"
+            class="overflow-hidden rounded-lg bg-background shadow-lg transition-all duration-300 ease-in-out"
             :class="isActive ? 'z-100 fixed bottom-0 right-0 top-0 flex w-full max-w-[300px] flex-col' : 'z-10'"
             :style="isActive ? { height: '100dvh' } : {}"
         >
             <!-- Header -->
-            <div v-if="isActive" class="flex flex-none cursor-pointer items-center justify-between bg-blue-500 p-2 text-black">
-                <span class="text-white">{{ recipient.name }}</span>
+            <div v-if="isActive" class="flex flex-none cursor-pointer items-center justify-between bg-accent p-2 text-accent-foreground">
+                <span>{{ recipient.name }}</span>
                 <div
                     @click="closeConversation"
-                    class="z-50 ml-auto flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-gray-500 text-white"
+                    class="z-50 ml-auto flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground"
                 >
                     X
                 </div>
             </div>
             <!-- Messages Area -->
             <div v-if="isActive" ref="messageScroller" id="message-scroller" class="flex-1 overflow-y-auto p-4">
-                <div v-for="message in messageStream" :key="message.id">
+                <div v-for="message in messageStream" :key="message.id" class="flex flex-col">
                     <div
-                        class="message mt-2 rounded-lg p-2"
+                        class="message mt-2 max-w-[80%] rounded-lg p-2"
                         :class="
                             message.user_id === currentUser
-                                ? 'self-start bg-green-500 text-left text-white'
-                                : 'self-end bg-blue-100 text-right text-black'
+                                ? 'self-end bg-accent text-accent-foreground'
+                                : 'self-start bg-secondary/20 text-foreground'
                         "
                     >
                         <div class="message-content">
                             <p class="text-xs italic">{{ message.user_id === currentUser ? 'You' : conversationNames[message.user_id] }}</p>
                             <p>{{ message.content }}</p>
                         </div>
-                        <p class="w-full text-right text-xs">{{ new Date(message.created_at).toLocaleString() }}</p>
+                        <p class="w-full text-right text-xs opacity-70">{{ new Date(message.created_at).toLocaleString() }}</p>
                     </div>
                 </div>
                 <div id="anchor"></div>
             </div>
 
             <!-- Input Area -->
-            <div v-if="isActive" class="flex-none border-t p-2">
+            <div v-if="isActive" class="flex-none border-t border-border p-2">
                 <form @submit.prevent="sendMessage" class="flex gap-2">
                     <input
                         type="text"
                         v-model="message"
-                        class="flex-1 rounded border p-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="flex-1 rounded border border-input bg-background p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         placeholder="Type a message..."
                     />
                     <button
                         :disabled="message.length === 0"
                         type="submit"
-                        class="rounded bg-blue-500 px-4 py-2 text-black transition-colors hover:cursor-pointer hover:bg-blue-600"
+                        class="rounded bg-accent px-4 py-2 text-accent-foreground transition-colors hover:bg-accent/90 disabled:opacity-50"
                     >
                         Send
                     </button>

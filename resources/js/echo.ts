@@ -1,6 +1,9 @@
+import { useCsrf } from '@/composables/useCsrf';
 import Echo from 'laravel-echo';
-
 import Pusher from 'pusher-js';
+
+const { csrf } = useCsrf();
+
 window.Pusher = Pusher;
 
 declare global {
@@ -14,15 +17,26 @@ window.Echo = new Echo({
     broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY,
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-    wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
-    wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-    forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],
-    // authEndpoint: '/broadcasting/auth',
-    withCredentials: true,
-    auth: {
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') as string,
-        },
+    forceTLS: true,
+    authorizer: (channel: any) => {
+        return {
+            authorize: (socketId: string, callback: any) => {
+                fetch('/broadcasting/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Socket-ID': socketId,
+                        'X-CSRF-TOKEN': csrf.value as string,
+                    },
+                    body: JSON.stringify({
+                        socket_id: socketId,
+                        channel_name: channel.name,
+                    }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => callback(null, data))
+                    .catch((error) => callback(error, null));
+            },
+        };
     },
 });

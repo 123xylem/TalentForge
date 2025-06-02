@@ -4,6 +4,7 @@ import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useCsrf } from '@/composables/useCsrf';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
@@ -24,6 +25,8 @@ const handleImageChange = (event) => {
         form.profile_image = file;
     }
 };
+
+const { csrf } = useCsrf();
 
 const form = useForm({
     name: '',
@@ -60,8 +63,6 @@ defineProps({
         type: String,
     },
 });
-
-const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 </script>
 
 <template>
