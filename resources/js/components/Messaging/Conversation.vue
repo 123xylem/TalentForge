@@ -146,8 +146,8 @@ const closeConversation = () => {
         <!-- Chat Button/Modal -->
         <div
             class="overflow-hidden rounded-lg bg-background shadow-lg transition-all duration-300 ease-in-out"
-            :class="isActive ? 'z-100 fixed bottom-0 right-0 top-0 flex w-full max-w-[300px] flex-col' : 'z-10'"
-            :style="isActive ? { height: '100dvh' } : {}"
+            :class="isActive ? 'z-100 fixed bottom-0 right-0 top-5 flex w-full max-w-[300px] flex-col' : 'z-10'"
+            :style="isActive ? { height: '95dvh' } : {}"
         >
             <!-- Header -->
             <div v-if="isActive" class="flex flex-none cursor-pointer items-center justify-between bg-accent p-2 text-accent-foreground">

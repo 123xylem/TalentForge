@@ -15,10 +15,11 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('content', 2000);
-            $table->foreignId('conversation_id')->constrained('conversations')
-                ->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')
-                ->onDelete('cascade');
+            $table->unsignedBigInteger('conversation_id');
+            $table->unsignedBigInteger('user_id');
+
+            $table->foreign('conversation_id')->references('id')->on('conversations')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

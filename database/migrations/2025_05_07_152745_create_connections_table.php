@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('connections', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('connected_user_id')->constrained('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('connected_user_id');
             $table->boolean('is_accepted')->default(false);
             $table->timestamps();
 
-            // Prevent duplicate connections
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('connected_user_id')->references('id')->on('users')->onDelete('cascade');
             $table->unique(['user_id', 'connected_user_id']);
         });
     }
