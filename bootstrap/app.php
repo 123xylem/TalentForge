@@ -9,7 +9,7 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Inertia;
+use Inertia\Inertia;
 use App\Http\Middleware\DebugRouteMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
