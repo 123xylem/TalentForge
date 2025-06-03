@@ -27,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+            // \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
             // DebugRouteMiddleware::class, ENABLE FOR ROUTE DEBUGGING
         ]);
     })

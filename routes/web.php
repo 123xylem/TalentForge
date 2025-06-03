@@ -75,11 +75,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/env-test', function () {
     return [
-        'all' => $_ENV,
+        // 'all' => $_ENV,
         'app_url' => config('app.url'),
         'app_env' => config('app.env'),
         'direct_env' => config('app.url'),
         'base_url' => url('/'),
         'asset_url' => asset('/'),
     ];
-})->middleware('auth')->name('env-test');
+})->middleware(['auth', 'verified'])->name('env-test');
