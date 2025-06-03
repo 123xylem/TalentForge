@@ -13,18 +13,18 @@ return new class extends Migration
     {
         Schema::create('listings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained(
-                table: 'users',
-                indexName: 'listings_employer_user'
-            )
-                ->where('type', 'employer')
-                ->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('description');
             $table->string('location')->nullable();
             $table->string('company')->nullable();
             $table->timestamps();
+
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 
