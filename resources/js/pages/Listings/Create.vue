@@ -23,7 +23,7 @@ const form = useForm({
     categories: [],
     slug: '',
 });
-//TODO: styling of form
+
 const submit = () => {
     //TODO make slug unique or remove slug constraint
     form.slug = form.title.toLowerCase().replace(/ /g, '-') + '-' + form.company.toLowerCase().replace(/ /g, '-');

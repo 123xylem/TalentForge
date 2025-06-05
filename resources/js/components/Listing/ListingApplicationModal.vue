@@ -44,7 +44,7 @@ defineExpose({ openModal, closeModal });
 //     'success' => 'Notification marked as read',
 // ])
 const submit = () => {
-    console.log('submit', form.data());
+    // console.log ('submit', form.data());
     form.post(route('listing-applications.store'), {
         preserveScroll: true,
         onSuccess: () => {
@@ -53,7 +53,7 @@ const submit = () => {
             emit('update:status', 'applied');
         },
         onError: (e) => {
-            console.log('error', e);
+            // console.log ('error', e);
         },
     });
 };

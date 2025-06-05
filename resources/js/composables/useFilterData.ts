@@ -55,7 +55,7 @@ export function useFilterData(url: string, dataType: string) {
     };
 
     const updateFilter = (key: keyof FilterState, value: string) => {
-        console.log(key, value);
+        // console.log (key, value);
         if (key === 'skills') {
             const skills = filters.value.skills;
             if (skills.includes(value)) {

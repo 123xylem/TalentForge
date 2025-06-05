@@ -8,7 +8,7 @@ interface FlashMessage {
 
 export function useFlash() {
     const page = usePage();
-    console.log('page', page.props);
+    // console.log ('page', page.props);
     const flash = ref<FlashMessage>({
         success: page.props.flash?.success,
         errors: page.props.flash?.errors,
@@ -18,7 +18,7 @@ export function useFlash() {
     watch(
         () => page.props.flash,
         (newFlash) => {
-            console.log('newFlash', newFlash);
+            // console.log ('newFlash', newFlash);
             alert(newFlash);
 
             if (newFlash) {

@@ -57,7 +57,7 @@ const submitForm = (action: string) => {
                 window.location.href = route('listings.show', listingApplication?.listing?.id);
             },
             onError: () => {
-                console.log('error');
+                // console.log ('error');
             },
         });
     } else {
@@ -66,7 +66,7 @@ const submitForm = (action: string) => {
                 window.location.href = route('listings.show', listingApplication?.listing?.id);
             },
             onError: () => {
-                console.log('error');
+                // console.log ('error');
             },
         });
     }

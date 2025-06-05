@@ -67,10 +67,10 @@ const updateListingStatus = () => {
     form.put(route('listings.update', listing?.id), {
         preserveState: false,
         onSuccess: (message) => {
-            console.log('success', listing?.listingClosed, message);
+            // console.log ('success', listing?.listingClosed, message);
         },
         onError: (e) => {
-            console.log('error', e);
+            // console.log ('error', e);
         },
     });
 };

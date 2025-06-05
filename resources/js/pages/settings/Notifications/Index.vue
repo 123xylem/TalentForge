@@ -31,7 +31,7 @@ const confirmModalOpen = (action: string, id?: string) => {
     confirmModalIsOpen.value = true;
     modalAction.value = action;
     notificationId.value = id ?? '';
-    console.log(notificationId.value, modalAction.value);
+    // console.log (notificationId.value, modalAction.value);
 };
 
 const confirmModalClose = () => {
@@ -58,7 +58,7 @@ const markAllAsRead = () => {
 };
 
 const deleteNotification = (notificationId?: string, action?: string) => {
-    console.log(notificationId, action);
+    // console.log (notificationId, action);
     if (action === 'deleteAll') {
         router.delete(route('notifications.destroyAll'), {
             onSuccess: () => {
@@ -69,7 +69,7 @@ const deleteNotification = (notificationId?: string, action?: string) => {
     } else {
         router.delete(route('notifications.destroy', { notification: notificationId }), {
             onSuccess: () => {
-                console.log(usePage().props.flash);
+                // console.log (usePage().props.flash);
                 router.get(route('notifications.index'), { preserveState: false, replace: true });
                 // window.location.href = route('notifications.index');
             },

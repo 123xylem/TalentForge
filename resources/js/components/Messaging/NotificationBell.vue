@@ -12,8 +12,6 @@ const form = useForm({
     notification_id: '',
 });
 
-//TODO: deleteOne instead of markAsRead
-//TODO: markasRead once clicked by default
 const submitOne = (id: string) => {
     event?.preventDefault();
     form.notification_id = id;
@@ -43,7 +41,7 @@ const submitAll = () => {
         preserveScroll: true,
         // preserveState: false,
         onError: (e) => {
-            console.log(e, 'error');
+            // console.log (e, 'error');
         },
     });
 };

@@ -62,5 +62,8 @@ A modern recruitment platform that revolutionizes the way companies connect with
 
 ## ⚠️ Known Limitations
 
-- Live chat functionality is currently working locally only due to Hostinger's WebSocket limitations
-- Real-time features are being optimized for the hosting environment
+- Live chat functionality is currently restricted due to shared host WebSocket limitations
+- Visual updates coming soon
+- Caching improvements coming soon
+- Application filtering
+- Job matching
